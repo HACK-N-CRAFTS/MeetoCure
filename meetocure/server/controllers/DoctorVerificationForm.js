@@ -58,7 +58,8 @@ const verifyDoctor = async (req, res) => {
 
     // ... (keep all your existing code for data processing, file uploads, etc.)
 
-    // Update doctor with verification details
+    // Update doctor with verification details 
+
     doctor.verificationDetails = verification._id;
     
     if (Object.keys(hospitalInfo).length > 0) {

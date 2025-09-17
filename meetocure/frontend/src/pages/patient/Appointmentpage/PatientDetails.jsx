@@ -318,7 +318,7 @@ const PatientDetails = () => {
             type="file"
             name="medicalRecords"
             multiple
-            accept="image/*,application/pdf"
+            accept="image/*"
             onChange={handleFilesChange}
             className="block w-full"
           />

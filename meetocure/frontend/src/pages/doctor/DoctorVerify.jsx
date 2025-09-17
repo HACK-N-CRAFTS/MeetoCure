@@ -309,7 +309,7 @@ return (
 
             {/* ✅ Updated OTP Verify + Timer + Resend */}
             <div className="flex items-center justify-between mt-2">
-              <button
+              <button 
                 type="button"
                 onClick={handleVerifyOtp}
                 className="px-4 py-2 bg-green-600 text-white rounded-full font-medium"

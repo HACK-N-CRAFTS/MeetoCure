@@ -29,7 +29,8 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
     const [isFavorite, setIsFavorite] = useState(hospital?.isFavorite || false);
     const [imageError, setImageError] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
-    console.log(hospital);
+    // kept console for debugging
+    // console.log(hospital);
     const handleFavoriteClick = (e) => {
         e.stopPropagation(); // Prevent card click when clicking favorite
         setIsFavorite(!isFavorite);
@@ -54,12 +55,13 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
     const reviewCount = hospital.reviewCount || Math.floor(Math.random() * 500) + 50;
 
     return (
+        // make card full-height flex column with a minimum height so all cards match
         <div 
-            className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+            className="w-full h-full min-h-[420px] bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col"
             onClick={onClick}
         >
             {/* Hospital Image */}
-            <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden">
+            <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden flex-shrink-0">
                 {/* Loading placeholder */}
                 {imageLoading && !imageError && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -120,62 +122,63 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
                 </div>
             </div>
 
-            {/* Card Content */}
-            <div className="p-4">
-                {/* Hospital Name */}
-                <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-[#0c4d6b] transition-colors">
-                    {hospital.hospitalName || hospital.name || "Unnamed Hospital"}
-                </h3>
+            {/* Card Content: make this area flexible so buttons stick to bottom */}
+            <div className="p-4 flex-1 flex flex-col justify-between">
+                <div className="mb-2">
+                    {/* Reserve fixed space for variable content so all cards align */}
+                    <div className="min-h-[150px] flex flex-col justify-start gap-3">
+                        {/* Hospital Name - reserve two lines height */}
+                        <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-[#0c4d6b] transition-colors min-h-[48px]">
+                            {hospital.hospitalName || hospital.name || "Unnamed Hospital"}
+                        </h3>
 
-                {/* Location */}
-                <div className="flex items-start gap-2 mb-3">
-                    <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-600 line-clamp-2">
-                        {hospital.address || hospital.location || "Address not available"}
-                    </span>
-                </div>
-
-                {/* Contact */}
-                {hospital.contact && (
-                    <div className="flex items-center gap-2 mb-3">
-                        <FaPhone className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-600">
-                            {hospital.contact}
-                        </span>
-                    </div>
-                )}
-
-                {/* Rating */}
-                <div className="flex items-center justify-between mb-3">
-                    <StarRating rating={rating} />
-                    <span className="text-xs text-gray-500">
-                        ({reviewCount} reviews)
-                    </span>
-                </div>
-
-                {/* Services/Specialties */}
-                {hospital.specialties && (
-                    <div className="mb-3">
-                        <div className="flex flex-wrap gap-1">
-                            {hospital.specialties.slice(0, 2).map((specialty, index) => (
-                                <span 
-                                    key={index}
-                                    className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full"
-                                >
-                                    {specialty}
-                                </span>
-                            ))}
-                            {hospital.specialties.length > 2 && (
-                                <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
-                                    +{hospital.specialties.length - 2} more
-                                </span>
-                            )}
+                        {/* Location - keep consistent height */}
+                        <div className="flex items-start gap-2">
+                            <FaMapMarkerAlt className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-600 line-clamp-2 break-words min-h-[36px]">
+                                {hospital.address || hospital.location || "Address not available"}
+                            </span>
                         </div>
+
+                        {/* Contact */}
+                        {hospital.contact && (
+                            <div className="flex items-center gap-2">
+                                <FaPhone className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                <span className="text-sm text-gray-600">{hospital.contact}</span>
+                            </div>
+                        )}
+
+                        {/* Rating */}
+                        <div className="flex items-center justify-between">
+                            <StarRating rating={rating} />
+                            <span className="text-xs text-gray-500">({reviewCount} reviews)</span>
+                        </div>
+
+                        {/* Services/Specialties (reserve single line height) */}
+                        {hospital.specialties && (
+                            <div className="mt-1">
+                                <div className="flex flex-wrap gap-1 items-center min-h-[28px]">
+                                    {hospital.specialties.slice(0, 2).map((specialty, index) => (
+                                        <span 
+                                            key={index}
+                                            className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full"
+                                        >
+                                            {specialty}
+                                        </span>
+                                    ))}
+                                    {hospital.specialties.length > 2 && (
+                                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                                            +{hospital.specialties.length - 2} more
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-3 border-t border-gray-100">
+                <div className="flex gap-2 pt-3 border-t border-gray-100 mt-3">
                     <button 
                         onClick={(e) => {
                             e.stopPropagation();
@@ -235,7 +238,7 @@ const HospitalCardList = ({ title = "Nearby Hospitals" }) => {
                 <div className="mb-6">
                     <h2 className="text-2xl font-semibold text-[#1F2A37]">{title}</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
                     {Array.from({ length: 8 }, (_, index) => (
                         <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
                             <div className="h-48 bg-gray-200"></div>
@@ -265,9 +268,8 @@ const HospitalCardList = ({ title = "Nearby Hospitals" }) => {
                         className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                         Retry
-                    </button>
-                </div> */}
-            </div>
+                    </button> */}
+                </div>
         );
     }
 
@@ -295,14 +297,15 @@ const HospitalCardList = ({ title = "Nearby Hospitals" }) => {
                 </span>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 items-stretch">
                 {itemsToShow?.map((hospital) => (
-                    <HospitalCard 
-                        key={hospital._id} 
-                        hospital={hospital} 
-                        onClick={() => navigate(`/hospital/${hospital._id}`)}
-                        onToggleFavorite={handleToggleFavorite}
-                    />
+                    <div key={hospital._id} className="w-full min-w-0 h-full">
+                        <HospitalCard 
+                            hospital={hospital} 
+                            onClick={() => navigate(`/hospital/${hospital._id}`)}
+                            onToggleFavorite={handleToggleFavorite}
+                        />
+                    </div>
                 ))}
             </div>
             
