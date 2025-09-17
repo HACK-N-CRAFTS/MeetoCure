@@ -26,7 +26,9 @@ const StarRating = ({ rating }) => {
 };
 
 const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
-    const [isFavorite, setIsFavorite] = useState(hospital?.isFavorite || false);
+
+    console.log(hospital);
+    const [isFavorite, setIsFavorite] = useState(hospital?.isFavorite);
     const [imageError, setImageError] = useState(false);
     const [imageLoading, setImageLoading] = useState(true);
     // kept console for debugging
@@ -178,7 +180,7 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-3 border-t border-gray-100 mt-3">
+                <div className="flex gap-2 pt-3 border-t border-gray-100">
                     <button 
                         onClick={(e) => {
                             e.stopPropagation();

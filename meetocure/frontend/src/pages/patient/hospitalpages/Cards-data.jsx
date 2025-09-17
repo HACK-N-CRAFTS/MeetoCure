@@ -174,14 +174,7 @@ const App = () => {
     }, [navigate]);
 
     // Stable filter options array
-   const filterOptions = useMemo(() => {
-    const setC = new Set(['All','Clinic']);
-    hospitals.forEach(h => {
-        if (h.category) setC.add(h.category);
-        if (h.type) setC.add(h.type);
-    });
-    return Array.from(setC);
-}, [hospitals]);
+
     // Memoized filtering and sorting
 const sortedAndFilteredHospitals = useMemo(() => {
     if (!Array.isArray(hospitals) || hospitals.length === 0) return [];
@@ -338,26 +331,7 @@ const sortedAndFilteredHospitals = useMemo(() => {
                     </div>
 
                     <div className="space-y-4">
-                        <div>
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Category</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {filterOptions.map(filter => (
-                                    <button
-                                        key={filter}
-                                        onClick={() => setActiveFilter(filter)}
-                                        className={`px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                                            activeFilter === filter
-                                                ? 'bg-[#0c4d6b] text-white shadow-md'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
-                                        type="button"
-                                    >
-                                        {filter}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
+                     
                         <div>
                             <h3 className="text-sm font-semibold text-gray-700 mb-3">Doctor Availability</h3>
                             <div className="flex flex-wrap gap-2">
@@ -461,6 +435,7 @@ const sortedAndFilteredHospitals = useMemo(() => {
                                 
                                 <HospitalCard
                                     hospital={hospital}
+                                    onClick={() => navigate(`/hospital/${hospital._id}`)}
                                     onToggleFavorite={handleToggleFavorite}
                                 />
                             </div>
