@@ -31,11 +31,16 @@ const HospitalDetails = () => {
     fetchHospital();
   }, [id]);
 
+  
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         setLoadingDoctors(true);
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`);
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`,{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          },
+        });
         const data = await res.json();
         if (hospital && hospital.hospitalName) {
           const filtered = data.filter(doc =>
@@ -83,7 +88,7 @@ const HospitalDetails = () => {
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hospital.hospitalName)}`;
 
   // pick image field with sensible fallbacks
-  const imageUrl = hospital?.image || hospital?.photo || hospital?.coverImage || hospital?.logo || "/assets/image.png";
+  const imageUrl = hospital?.hospitalImage || hospital?.photo || hospital?.coverImage || hospital?.logo || "/assets/image.png";
 
   return (
     <div className="flex font-[Poppins] bg-[#F8FAFC] min-h-screen">

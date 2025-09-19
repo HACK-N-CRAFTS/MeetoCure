@@ -69,8 +69,12 @@ const PatientDashboard = () => {
     setErrorDoctors(null);
     try {
       // Use backend to fetch doctors matching the category
+      const token = localStorage.getItem("token");
       const resp = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`, {
         params: { category },
+        headers: {
+        Authorization: `Bearer ${token}`, // send token here
+    },
       });
       const mappedDoctors = resp.data.map((doc) => ({
         id: doc.doctorId,
@@ -129,7 +133,13 @@ const PatientDashboard = () => {
 
     setLoadingDoctors(true);
     axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`)
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // send token here
+          },
+        }
+      )
       .then((res) => {
         const mappedDoctors = res.data.map((doc) => ({
           id: doc.doctorId,

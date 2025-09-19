@@ -46,7 +46,7 @@ router.post(
 );
 
 //Patient views their own appointments 
-router.get("/my", protect(["patient"]), getPatientAppointments);
+router.get("/my", protect(["patient"]), getPatientAppointments); 
 
 //Doctor views all their appointments -- Done
 router.get("/doctor", protect(["doctor"]), getDoctorAppointments);

@@ -6,7 +6,7 @@ const { getDoctorProfile, updateDoctorProfile, getDoctorStats } = require("../co
 const DoctorVerificationShema = require("../models/DoctorVerificationShema");
 
 // Public: list doctors, supports optional filtering via query params
-router.get("/", async (req, res) => {
+router.get("/", protect(["doctor","patient"]),async (req, res) => {
   try {
     const { category, search } = req.query;
     const filter = {};
@@ -65,7 +65,7 @@ router.put("/profile", protect(["doctor"]),updateDoctorProfile);
 router.get("/stats", protect(["doctor"]), getDoctorStats);
 
 // Get doctor by id (keep after other routes)
-router.get("/:id", async (req, res) => {
+router.get("/:id",async (req, res) => {
   try {
     const doctorId = req.params.id;
     const doctor = await DoctorVerificationShema.findOne({doctorId:doctorId});
