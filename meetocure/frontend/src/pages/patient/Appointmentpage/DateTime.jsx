@@ -87,6 +87,47 @@ const DateTime = () => {
     fetchAvailabilityForDate(formatted);
   };
 
+  // helper: format Date -> yyyy-mm-dd
+  const formatDate = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  // helper: parse a slot string like "9:00 AM", "09:00", "14:30" into a Date for given yyyy-mm-dd
+  const parseSlotToDate = (slotStr, yyyyMmDd) => {
+    try {
+      // Normalize slot: trim
+      const s = String(slotStr).trim();
+
+      // Try HH:MM AM/PM
+      const ampmMatch = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      let hours = 0, minutes = 0;
+      if (ampmMatch) {
+        hours = Number(ampmMatch[1]);
+        minutes = Number(ampmMatch[2]);
+        const ampm = ampmMatch[3].toUpperCase();
+        if (ampm === "PM" && hours < 12) hours += 12;
+        if (ampm === "AM" && hours === 12) hours = 0;
+      } else {
+        // Try 24h "HH:MM"
+        const h24 = s.match(/^(\d{1,2}):(\d{2})$/);
+        if (h24) {
+          hours = Number(h24[1]);
+          minutes = Number(h24[2]);
+        } else {
+          // fallback: try Date parse with the date
+          const d = new Date(`${yyyyMmDd}T${s}`);
+          if (!isNaN(d.getTime())) return d;
+          return new Date("invalid");
+        }
+      }
+      const [y, m, d] = yyyyMmDd.split("-").map(Number);
+      return new Date(y, m - 1, d, hours, minutes, 0, 0);
+    } catch (e) {
+       console.log(e);
+      return new Date("invalid");
+     
+    }
+  };
+
   // Fetch availability for doctor and pick slots for selected date
   const fetchAvailabilityForDate = async (dateParam) => {
     if (!doctorId) {
@@ -94,17 +135,24 @@ const DateTime = () => {
       return;
     }
 
-    // accept either explicit dateParam (string) or fallback to selectedDate state
     const dateToUse = dateParam || selectedDate;
     if (!dateToUse) {
       toast.error("Please select a date first");
       return;
     }
 
-    // if we already fetched availabilityDays once, reuse it
     if (availabilityDays) {
       const day = availabilityDays.find(d => d.date === dateToUse);
-      setAvailableSlots(day ? day.slots || [] : []);
+      let slots = day ? (Array.isArray(day.slots) ? day.slots.slice() : []) : [];
+      // If selected date is today, filter out slots earlier than now
+      if (dateToUse === formatDate(new Date())) {
+        const now = new Date();
+        slots = slots.filter(slot => {
+          const slotDt = parseSlotToDate(slot, dateToUse);
+          return !isNaN(slotDt.getTime()) && slotDt.getTime() >= now.getTime();
+        });
+      }
+      setAvailableSlots(slots);
       if (!day) setSlotsError("No slots set for this date");
       return;
     }
@@ -119,8 +167,19 @@ const DateTime = () => {
       setAvailabilityDays(days);
 
       const day = days.find(d => d.date === dateToUse);
-      if (day && Array.isArray(day.slots) && day.slots.length > 0) {
-        setAvailableSlots(day.slots);
+      let slots = day && Array.isArray(day.slots) ? day.slots.slice() : [];
+
+      // If selected date is today, remove past slots so user only sees future/current times
+      if (dateToUse === formatDate(new Date())) {
+        const now = new Date();
+        slots = slots.filter(slot => {
+          const slotDt = parseSlotToDate(slot, dateToUse);
+          return !isNaN(slotDt.getTime()) && slotDt.getTime() >= now.getTime();
+        });
+      }
+
+      if (slots.length > 0) {
+        setAvailableSlots(slots);
       } else {
         setAvailableSlots([]);
         setSlotsError("No slots set for this date");

@@ -14,18 +14,22 @@ const DoctorVerify = () => {
     mobileNumber: "",
   });
 
+  // toggle show/hide password
+  const [showPassword, setShowPassword] = useState(false);
+  
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [otpExpiry, setOtpExpiry] = useState(null); // timestamp ms
   const [timer, setTimer] = useState(0);
   const timerRef = useRef(null);
-  // eslint-disable-next-line no-unused-vars
   const [showPopup, setShowPopup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // eslint-disable-next-line no-unused-vars
   const [registrationStatus, setRegistrationStatus] = useState("under review by hospital");
+
+  // NEW: prevent duplicate auth requests
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // If already logged in, redirect appropriately
   useEffect(() => {
@@ -45,8 +49,7 @@ const DoctorVerify = () => {
     }
   }, [navigate]);
 
-    useEffect(() => {
-    // countdown timer for OTP expiry
+  useEffect(() => {
     if (!otpSent || !otpExpiry) return;
     setTimer(Math.max(0, Math.ceil((otpExpiry - Date.now()) / 1000)));
 
@@ -72,7 +75,7 @@ const DoctorVerify = () => {
   };
 
   /** ========== SEND OTP ========== */
- const handleSendOtp = async () => {
+  const handleSendOtp = async () => {
     const loadingToast = toast.loading("Sending OTP...");
     try {
       let phone = formData.mobileNumber.trim();
@@ -85,10 +88,8 @@ const DoctorVerify = () => {
         { phone }
       );
 
-      // set registration status if provided
       setRegistrationStatus(res.data.registrationStatus);
 
-      // set OTP state + 2 minute expiry
       const expiresIn = (res.data.expiresInSeconds && Number(res.data.expiresInSeconds)) || 120;
       const expiryTs = Date.now() + expiresIn * 1000;
       setOtpExpiry(expiryTs);
@@ -135,17 +136,22 @@ const DoctorVerify = () => {
 
       toast.dismiss(loadingToast);
       toast.success("OTP Verified!");
+
+      // Automatically proceed to authentication (sign-in / register)
+      // Use a small delay to allow the toast to show briefly
+      setTimeout(() => {
+        if (!isSubmitting) performAuth();
+      }, 300);
     } catch (err) {
       toast.dismiss(loadingToast);
       toast.error(err.response?.data?.message || "Invalid OTP");
     }
   };
 
-  /** ========== REGISTER / LOGIN ========== */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!otpVerified) return toast.error("Please verify OTP first");
-
+  /** Perform authentication (used by submit and automatic flow after OTP verification) */
+  const performAuth = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     const loadingToast = toast.loading("Signing in...");
     try {
       const res = await axios.post(
@@ -153,20 +159,15 @@ const DoctorVerify = () => {
         formData
       );
 
-      // Handle successful response
       const { data } = res;
 
-      // If login successful and verified
       if (data.token && data.doctor.registrationStatus === "verified") {
         localStorage.setItem("doctorToken", data.token);
         localStorage.setItem("doctorInfo", JSON.stringify(data.doctor));
         toast.dismiss(loadingToast);
         toast.success("Login successful!");
         navigate("/doctor-dashboard");
-      }
-      // If new registration, redirect to hospital form
-      else if (data.isNewlyRegistered) {
-        // Store basic doctor info for the hospital form
+      } else if (data.isNewlyRegistered) {
         const doctorInfo = {
           doctorId: data.doctorId,
           email: formData.email,
@@ -175,35 +176,37 @@ const DoctorVerify = () => {
         };
         localStorage.setItem("doctorInfo", JSON.stringify(doctorInfo));
         localStorage.setItem("doctorId", data.doctorId);
-        
+
         toast.dismiss(loadingToast);
         setShowPopup(true);
         toast.success("Registration submitted successfully! Redirecting to hospital verification...");
-        // Wait for 2 seconds to show the popup before redirecting
         setTimeout(() => {
           navigate("/hospital-form");
         }, 1000);
-      }
-      // If existing user but not verified, redirect to verification status
-      else if (data.registrationStatus === "under review by hospital") {
+      } else if (data.registrationStatus === "under review by hospital") {
         toast.dismiss(loadingToast);
         setShowPopup(true);
         toast.success("Your registration is under review. Redirecting to verification status...");
-        // Wait for 2 seconds to show the popup before redirecting
         setTimeout(() => {
           navigate("/doctor-verify");
         }, 1000);
-      }
-      // Handle other cases
-      else {
+      } else {
         toast.dismiss(loadingToast);
         toast.error(data.message || "Something went wrong");
       }
-    } 
-    catch (err) {
+    } catch (err) {
       toast.dismiss(loadingToast);
       toast.error(err.response?.data?.message || "Login failed");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  /** ========== REGISTER / LOGIN (form submit) ========== */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!otpVerified) return toast.error("Please verify OTP first");
+    await performAuth();
   };
 
 return (
@@ -248,28 +251,21 @@ return (
 
       {/* Password */}
       <div>
-      <label className="block text-sm font-semibold mb-1">Password</label>
-      <div className="flex items-center border border-[#7A869A] rounded-xl px-3 py-2">
-        <FaLock className="text-[#7A869A] mr-2" />
-        <input
-          type={showPassword ? "text" : "password"}
-          name="password"
-          placeholder="Enter Password (min 6 chars)"
-          className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
-          required
-          value={formData.password}
-          onChange={handleChange}
-          minLength={6}
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((prev) => !prev)}
-          className="focus:outline-none ml-2 text-[#7A869A]"
-        >
-          {showPassword ? <FaEyeSlash /> : <FaEye />}
-        </button>
+        <label className="block text-sm font-semibold mb-1">Password</label>
+        <div className="flex items-center border border-[#7A869A] rounded-xl px-3 py-2">
+          <FaLock className="text-[#7A869A] mr-2" />
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter Password (min 6 chars)"
+            className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            minLength={6}
+          />
+        </div>
       </div>
-    </div>
 
       {/* Mobile + OTP */}
       <div>
@@ -315,7 +311,6 @@ return (
               required
             />
 
-            {/* ✅ Updated OTP Verify + Timer + Resend */}
             <div className="flex items-center justify-between mt-2">
               <button 
                 type="button"
@@ -351,7 +346,8 @@ return (
       <div className="pt-4">
         <button
           type="submit"
-          className="w-full py-3 rounded-full font-semibold bg-[#004B5C] text-white hover:bg-[#003246] transition"
+          disabled={isSubmitting}
+          className="w-full py-3 rounded-full font-semibold bg-[#004B5C] text-white hover:bg-[#003246] transition disabled:opacity-60"
         >
           Continue
         </button>
@@ -378,8 +374,6 @@ return (
       </div>
     )}
   </div>
-);
-
-};
+)};
 
 export default DoctorVerify;

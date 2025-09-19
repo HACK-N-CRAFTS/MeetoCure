@@ -175,7 +175,7 @@ const QuickStatsPage = () => {
       period: "All Time"
     },
   ];
-
+ 
   // Period filter options
   // const periodOptions = [
   //   { value: 'today', label: 'Today' },
@@ -192,6 +192,31 @@ const QuickStatsPage = () => {
     // { id: 'patients', label: 'Patients', icon: <Users className="w-4 h-4" /> },
     // { id: 'analytics', label: 'Analytics', icon: <PieChart className="w-4 h-4" /> }
   ];
+
+  // Normalize monthly trend data from various possible sources
+  const getMonthlyTrend = () => {
+    // direct monthlyTrend from API
+    if (Array.isArray(stats?.monthlyTrend) && stats.monthlyTrend.length) {
+      return stats.monthlyTrend;
+    }
+
+    // earningsByMonth shape fallback: [{ month, earnings }]
+    if (Array.isArray(stats?.earningsByMonth) && stats.earningsByMonth.length) {
+      return stats.earningsByMonth.map((item) => ({
+        month: item.month || item.label || '',
+        earnings: item.earnings ?? item.value ?? item.amount ?? 0,
+      }));
+    }
+
+    // If only a single monthlyEarnings value exists, synthesize a small series
+    if (typeof stats?.monthlyEarnings === 'number') {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+      return months.map((m, i) => ({ month: m, earnings: i === 0 ? stats.monthlyEarnings : 0 }));
+    }
+
+    // No trend available
+    return [];
+  };
 
   const renderOverviewTab = () => (
     <div className="space-y-6">
@@ -232,11 +257,30 @@ const QuickStatsPage = () => {
       </div>
 
       {/* Earnings Chart */}
-      <EarningsChart 
-        title="Monthly Earnings Trend"
-        data={stats?.monthlyTrend || []}
-        height={250}
-      />
+      {(() => {
+        const monthlyTrend = getMonthlyTrend();
+        if (monthlyTrend.length === 0) {
+          return (
+            <div className="bg-white rounded-2xl shadow-lg p-6 text-center text-gray-500">
+              No earnings trend data available.
+              <button
+                onClick={fetchStats}
+                className="ml-3 text-sm text-[#0A4D68] underline"
+              >
+                Refresh
+              </button>
+            </div>
+          );
+        }
+
+        return (
+          <EarningsChart
+            title="Monthly Earnings Trend"
+            data={monthlyTrend}
+            height={250}
+          />
+        );
+      })()}
     </div>
   );
 

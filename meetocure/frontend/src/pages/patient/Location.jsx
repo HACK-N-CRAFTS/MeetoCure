@@ -227,7 +227,11 @@ const handleCitySearch = useCallback(debounce(async (query) => {
           type="text"
           placeholder="Search for a city..."
           value={search}
-          onChange={(e) => handleCitySearch(e.target.value)}
+          onChange={(e) => {
+            const v = e.target.value;
+            setSearch(v);           
+            handleCitySearch(v);    
+          }}
           onKeyDown={handleKeyDown}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D68] mb-4 text-base"
         />

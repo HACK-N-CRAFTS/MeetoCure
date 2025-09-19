@@ -485,7 +485,7 @@ export const DoctorVerification = () => {
           {/* Medical Council Certificate (image) */}
           <div>
             <label className="block text-sm font-semibold mb-1">
-              Medical Council Certificate (Image)
+              Medical Council Certificate (Image)z
             </label>
             <input
               type="file"
