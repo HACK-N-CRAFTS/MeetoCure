@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaEnvelope, FaPhoneAlt, FaLock, FaArrowLeft } from "react-icons/fa";
+import { FaEnvelope, FaPhoneAlt, FaLock, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -22,6 +22,7 @@ const DoctorVerify = () => {
   const timerRef = useRef(null);
   // eslint-disable-next-line no-unused-vars
   const [showPopup, setShowPopup] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // eslint-disable-next-line no-unused-vars
   const [registrationStatus, setRegistrationStatus] = useState("under review by hospital");
@@ -247,21 +248,28 @@ return (
 
       {/* Password */}
       <div>
-        <label className="block text-sm font-semibold mb-1">Password</label>
-        <div className="flex items-center border border-[#7A869A] rounded-xl px-3 py-2">
-          <FaLock className="text-[#7A869A] mr-2" />
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter Password (min 6 chars)"
-            className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            minLength={6}
-          />
-        </div>
+      <label className="block text-sm font-semibold mb-1">Password</label>
+      <div className="flex items-center border border-[#7A869A] rounded-xl px-3 py-2">
+        <FaLock className="text-[#7A869A] mr-2" />
+        <input
+          type={showPassword ? "text" : "password"}
+          name="password"
+          placeholder="Enter Password (min 6 chars)"
+          className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
+          required
+          value={formData.password}
+          onChange={handleChange}
+          minLength={6}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="focus:outline-none ml-2 text-[#7A869A]"
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </button>
       </div>
+    </div>
 
       {/* Mobile + OTP */}
       <div>

@@ -188,7 +188,7 @@ const ChooseRoleScreen = () => {
         </div>
       )}
 
-      <style jsx>{`
+  {/* <style jsx>{`
         @keyframes pulse {
           0%,
           100% {
@@ -198,7 +198,8 @@ const ChooseRoleScreen = () => {
             opacity: 0.7;
           }
         }
-      `}</style>
+      `}</style> */}
+
     </div>
   );
 };

@@ -194,7 +194,7 @@ const DoctorPatientDetailsPage = () => {
                 </div>
               )}
               
-              {patient.allergies && patient.allergies.length > 0 && (
+              {/* {patient.allergies && patient.allergies.length > 0 && (
                 <div className="bg-red-50 rounded-lg p-4 mt-4">
                   <p className="text-sm text-red-800 mb-2">
                     <strong>Allergies:</strong>
@@ -208,7 +208,7 @@ const DoctorPatientDetailsPage = () => {
                   </div>
                 </div>
               )}
-              
+               */}
               {patient.medical_history_summary && (
                 <div className="bg-yellow-50 rounded-lg p-4 mt-4">
                   <p className="text-sm text-yellow-800">

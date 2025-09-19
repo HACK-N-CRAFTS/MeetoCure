@@ -131,8 +131,8 @@ const Terms = () => {
           </p>
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div>
-              <p><strong>Email:</strong> support@meetocure.com</p>
-              <p><strong>Phone:</strong> +91 98765 43210</p>
+              <p><strong>Email:</strong> meetocure2025@gmail.com</p>
+              <p><strong>Phone:</strong> +91 79818 68489</p>
             </div>
             <div>
               <p><strong>Address:</strong> Meetocure Healthcare Pvt. Ltd.</p>

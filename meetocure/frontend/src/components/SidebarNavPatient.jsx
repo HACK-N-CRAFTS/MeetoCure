@@ -14,8 +14,8 @@ import PatientEnquiryForm from "../pages/patient/PatientEnquery/PatientPublicFor
 
 // navitems
 const navItems = [
+   { icon: <FaHome />, label: "Home", path: "/patient-dashboard" },
   { icon: <FaHospital />, label: "Hospitals", path: "/hospitalpages/Cards-data" },
-  { icon: <FaHome />, label: "Home", path: "/patient-dashboard" },
   { 
     icon: <FaCalendarAlt />, 
     label: (

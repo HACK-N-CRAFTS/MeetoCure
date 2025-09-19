@@ -62,9 +62,10 @@ import NotificationsList from './components/NotificationList.jsx';
 import ProfileView from "./pages/doctor/profile/profileView";
 
 
-import { GoogleMapsProvider } from './contexts/GoogleMapsContext';
+// import { GoogleMapsProvider } from './contexts/GoogleMapsContext';
 import AppointmentProvider from "./contexts/AppointmentContext.jsx";
 import DcoterVerificationPending from "./pages/doctor/DcoterVerificationPending.jsx";
+import ScrollToTop from "./components/ScrollTop.jsx";
 
 function App() {
     // const navigate=useNavigate();cd
@@ -93,7 +94,9 @@ function App() {
 
   return (
     // <AuthProvider>
-    <GoogleMapsProvider>
+    // <GoogleMapsProvider>
+    <div>
+      <ScrollToTop />
       <Routes>
         {/* Common Routes */}
         <Route path="/" element={<SplashScreen />} />
@@ -181,8 +184,9 @@ function App() {
 
       </Routes>
       <Toaster position="top-right" />
-    </GoogleMapsProvider>
-    // {/* </AuthProvider> */}
+    {/*</GoogleMapsProvider> */}
+   {/* </AuthProvider> */}
+    </div>
   );
 }
 

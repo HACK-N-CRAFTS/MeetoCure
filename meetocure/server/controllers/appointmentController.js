@@ -22,13 +22,6 @@ const bookAppointment = async (req, res) => {
     // If individual fields were sent outside patientInfo (compat), merge them
     if (!patientInfo) patientInfo = {};
     if (req.body.blood_group) patientInfo.blood_group = req.body.blood_group;
-    if (req.body.allergies && !Array.isArray(patientInfo.allergies)) {
-      try {
-        patientInfo.allergies = JSON.parse(req.body.allergies);
-      } catch {
-        patientInfo.allergies = req.body.allergies ? req.body.allergies.split(",").map(a => a.trim()).filter(Boolean) : [];
-      }
-    }
     if (req.body.medical_history_summary && !patientInfo.medical_history_summary) {
       patientInfo.medical_history_summary = req.body.medical_history_summary;
     }

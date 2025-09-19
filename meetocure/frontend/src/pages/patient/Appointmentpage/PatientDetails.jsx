@@ -23,7 +23,6 @@ const PatientDetails = () => {
     age: "",
     gender: "",
     blood_group: "",
-    allergies: "", // comma separated
     medical_history_summary: "",
     reason: "",
   });
@@ -71,7 +70,7 @@ const PatientDetails = () => {
   const removeFile = (id) => setFiles((prev) => prev.filter((f) => f.id !== id));
 
   const handleContinue = async () => {
-    const { name, phone, age, gender, blood_group, allergies, medical_history_summary, reason } = formData;
+    const { name, phone, age, gender, blood_group, medical_history_summary, reason } = formData;
 
     if (!name || !phone || !age || !gender) {
       toast.error("Please fill all required fields");
@@ -120,7 +119,6 @@ const PatientDetails = () => {
         age,
         gender: gender.toLowerCase(),
         blood_group: blood_group || null,
-        allergies: allergies ? allergies.split(",").map(a => a.trim()).filter(Boolean) : [],
         medical_history_summary: medical_history_summary || "",
       };
       data.append("patientInfo", JSON.stringify(patientInfoObj));
@@ -273,7 +271,7 @@ const PatientDetails = () => {
         </div>
 
         {/* Allergies */}
-        <div>
+        {/* <div>
           <label className="block font-semibold mb-1">Allergies (comma separated)</label>
           <input
             type="text"
@@ -283,7 +281,7 @@ const PatientDetails = () => {
             onChange={handleInputChange}
             className="w-full border border-gray-300 rounded-xl px-4 py-2 bg-white"
           />
-        </div>
+        </div> */}
 
         {/* Medical History Summary */}
         <div>

@@ -193,7 +193,7 @@ const sortedAndFilteredHospitals = useMemo(() => {
     if (doctorFilter !== 'All') {
         processedHospitals = processedHospitals.filter(h => {
             const doctorCount = Array.isArray(h.doctors) ? h.doctors.length : 0;
-            if (doctorFilter === 'With Doctors') return doctorCount > 0;
+            if (doctorFilter === 'Available Doctors') return doctorCount > 0;
             if (doctorFilter === 'No Doctors') return doctorCount === 0;
             return true;
         });
@@ -335,7 +335,7 @@ const sortedAndFilteredHospitals = useMemo(() => {
                         <div>
                             <h3 className="text-sm font-semibold text-gray-700 mb-3">Doctor Availability</h3>
                             <div className="flex flex-wrap gap-2">
-                                {['All', 'With Doctors', 'No Doctors'].map(filter => (
+                                {['All', 'Available Doctors', 'No Doctors'].map(filter => (
                                     <button
                                         key={filter}
                                         onClick={() => setDoctorFilter(filter)}

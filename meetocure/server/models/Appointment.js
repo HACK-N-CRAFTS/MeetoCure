@@ -25,9 +25,7 @@ const appointmentSchema = new mongoose.Schema(
         enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
         default: null,
       },
-      allergies: { type: [String], default: [] },
-      medical_history_summary: { type: String, default: "" },
-      note: { type: String, default: "" },
+
     },
 
     // Medical Records
