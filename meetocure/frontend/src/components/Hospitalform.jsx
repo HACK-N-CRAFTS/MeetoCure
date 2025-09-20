@@ -177,17 +177,6 @@ const App = () => {
     console.log('🔄 Manual entry mode:', !isManualEntry);
   };
 
-  // **NEW: Helper function to get current hospital data**
-  const getCurrentHospitalData = () => {
-    return {
-      hospitalId: selectedHospitalId,
-      hospitalName: hospitalName.trim(),
-      hospitalAddress: hospitalAddress.trim(),
-      contactNumber: contactNumber.trim(),
-      isManualEntry: isManualEntry
-    };
-  };
-
   // **NEW: Validation helper**
   const isFormValid = () => {
     return hospitalName.trim() && hospitalAddress.trim() && contactNumber.trim();
@@ -354,26 +343,6 @@ const App = () => {
             />
           </div>
 
-          {/* **ENHANCED: Selected hospital display with more details** */}
-          {!isManualEntry && selectedHospitalId && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h3 className="font-semibold text-green-800 mb-2 flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Selected Hospital
-              </h3>
-              <div className="text-sm text-green-700 space-y-1">
-                <p><strong>Hospital ID:</strong> {selectedHospitalId}</p>
-                <p><strong>Name:</strong> {hospitalName}</p>
-                <p><strong>Address:</strong> {hospitalAddress}</p>
-                <p><strong>Contact:</strong> {contactNumber}</p>
-              </div>
-              <p className="text-xs text-green-600 mt-2 italic">
-                This hospital will be linked to your doctor profile during verification.
-              </p>
-            </div>
-          )}
 
           {/* **NEW: Manual entry indication** */}
           {isManualEntry && isFormValid() && (
@@ -427,15 +396,6 @@ const App = () => {
           </button>
         </div>
 
-        {/* **NEW: Debug info (remove in production)** */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">Debug Info:</h4>
-            <pre className="text-xs text-gray-600 overflow-x-auto">
-              {JSON.stringify(getCurrentHospitalData(), null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
     </div>
   );

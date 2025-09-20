@@ -41,7 +41,7 @@ export const DoctorVerification = () => {
     fullName: "",
     gender: "",
     dateOfBirth: "",
-    medicalCouncilRegistrationNumber: "",
+    medicalCouncilRegistrationNumber: "", // Required, unique
     medicalCouncilName: "",
     yearOfRegistration: "",
     primarySpecialization: "",
@@ -51,13 +51,10 @@ export const DoctorVerification = () => {
     experienceYears: "",
     location: {
       city: "",
-      state: "",
-      pincode: "",
-      address: "",
-      landmark: ""
+      state: ""
     },
-    aadhaarNumber: "",
-    panNumber: "",
+    aadhaarNumber: "", // Unique with validation
+    panNumber: "", // Unique with validation
     // these will be filled by backend after file upload
     identityDocument: "",
     medicalCouncilCertificate: "",
@@ -80,6 +77,25 @@ export const DoctorVerification = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Special validation for Aadhaar and PAN
+    if (name === 'aadhaarNumber') {
+      // Allow only numbers and limit to 12 digits
+      const cleanedValue = value.replace(/\D/g, '').slice(0, 12);
+      setFormData((prev) => ({ ...prev, [name]: cleanedValue }));
+      return;
+    }
+    
+    if (name === 'panNumber') {
+      // Convert to uppercase and limit to 10 characters
+      const cleanedValue = value.toUpperCase().slice(0, 10);
+      // Only allow letters and numbers
+      if (/^[A-Z0-9]*$/.test(cleanedValue)) {
+        setFormData((prev) => ({ ...prev, [name]: cleanedValue }));
+      }
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -150,23 +166,24 @@ export const DoctorVerification = () => {
       return toast.error("Please provide information in the About section");
     }
     
-    // Validate PAN number format if provided
-    if (formData.panNumber && formData.panNumber.trim() !== '') {
-      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
-      if (!panRegex.test(formData.panNumber.trim())) {
-        return toast.error("Invalid PAN number format. Should be like ABCDE1234F");
-      }
-    }
-
     // Validate Aadhaar number format if provided
     if (formData.aadhaarNumber && formData.aadhaarNumber.trim() !== '') {
       const aadhaarRegex = /^\d{12}$/;
       if (!aadhaarRegex.test(formData.aadhaarNumber.trim())) {
-        return toast.error("Invalid Aadhaar number format. Should be 12 digits");
+        return toast.error("Invalid Aadhaar number format. Should be exactly 12 digits");
       }
     }
 
-    // Remove empty PAN and Aadhaar numbers
+    // Validate PAN number format only if provided (optional field)
+    if (formData.panNumber && formData.panNumber.trim() !== '') {
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+      if (!panRegex.test(formData.panNumber.trim())) {
+        toast.error("If providing PAN, format should be ABCDE1234F. You can also leave it empty.");
+        return;
+      }
+    }
+
+    // Remove empty PAN and Aadhaar numbers before submission
     const dataToSubmit = { ...formData };
     if (!dataToSubmit.panNumber || dataToSubmit.panNumber.trim() === '') {
       delete dataToSubmit.panNumber;
@@ -458,10 +475,11 @@ export const DoctorVerification = () => {
             <input
               type="text"
               name="panNumber"
-              placeholder="Enter PAN"
+              placeholder="Enter PAN (optional)"
               value={formData.panNumber}
               onChange={handleChange}
               className="w-full border border-gray-400 px-4 py-2 rounded-xl"
+              aria-required="false"
             />
           </div>
 
@@ -530,29 +548,24 @@ export const DoctorVerification = () => {
             />
           </div>
 
-          {/* Additional Location Fields */}
+          {/* Location Fields */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Location Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
-                placeholder="Address"
-                value={formData.location.address}
-                onChange={(e) => handleLocationChange('address', e.target.value)}
+                placeholder="City"
+                value={formData.location.city}
+                onChange={(e) => handleLocationChange('city', e.target.value)}
+                required
                 className="w-full border border-gray-400 px-4 py-2 rounded-xl"
               />
               <input
                 type="text"
-                placeholder="Landmark"
-                value={formData.location.landmark}
-                onChange={(e) => handleLocationChange('landmark', e.target.value)}
-                className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-              />
-              <input
-                type="text"
-                placeholder="Pincode"
-                value={formData.location.pincode}
-                onChange={(e) => handleLocationChange('pincode', e.target.value)}
+                placeholder="State"
+                value={formData.location.state}
+                onChange={(e) => handleLocationChange('state', e.target.value)}
+                required
                 className="w-full border border-gray-400 px-4 py-2 rounded-xl"
               />
             </div>

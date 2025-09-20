@@ -102,6 +102,9 @@ const BankingInformation = () => {
       // Create FormData instance
       const formDataToSend = new FormData();
 
+      // Add verification status
+      formDataToSend.append('verification', 'pending');
+
       // Append hospital data
       Object.entries(hospitalData).forEach(([key, value]) => {
         formDataToSend.append(`hospital_${key}`, value);
@@ -127,8 +130,14 @@ const BankingInformation = () => {
         Object.entries(doctorInfo).filter(([key]) => !fileFields.includes(key))
       );
       
+      // Handle qualifications array separately
+      if (filteredDoctorInfo.qualifications) {
+        formDataToSend.append('qualifications', JSON.stringify(filteredDoctorInfo.qualifications));
+      }
+
+      // Handle other doctor info
       Object.entries(filteredDoctorInfo).forEach(([key, value]) => {
-        if (value === undefined || value === null) return;
+        if (value === undefined || value === null || key === 'qualifications') return;
         if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
           formDataToSend.append(key, JSON.stringify(value));
         } else {
@@ -159,6 +168,11 @@ const BankingInformation = () => {
       }
 
       const url = `${API_BASE_URL}/api/doctor/verify-doctor?doctorId=${doctorId}`;
+      // Log the FormData contents for debugging
+      formDataToSend.forEach((value, key) => {
+        console.log(`Sending: ${key} = ${value}`);
+      });
+
       const response = await fetch(url, {
         method: 'POST',
         body: formDataToSend,
@@ -167,7 +181,10 @@ const BankingInformation = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Server error response:', errorData);
-        throw new Error(errorData.message || 'Failed to submit verification data');
+        
+        // More detailed error message
+        const errorMessage = `Server Error: ${errorData.message}. Status: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();

@@ -27,15 +27,26 @@ const ChatAI = () => {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   // Get doctorId from localStorage
-  const doctorId = JSON.parse(localStorage.getItem("doctorInfo"))?.doctorId;
-  // Fetch chat history on component mount
+  const doctorInfo = JSON.parse(localStorage.getItem("doctorInfo") || "{}");
+  const doctorId = doctorInfo?.doctorId;
+
+  // Verify authentication on mount
+  useEffect(() => {
+    const token = localStorage.getItem("doctorToken");
+    if (!token) {
+      toast.error("Please login to access the chat");
+      navigate("/doctor-verify");
+      return;
+    }
+  }, [navigate]);
+
+  // Fetch chat history on mount
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
         const token = localStorage.getItem("doctorToken");
-        if (!token || !doctorId) {
-          toast.error("Please login again");
-          navigate("/auth/doctor");
+        if (!doctorId) {
+          console.error("Doctor ID not found");
           return;
         }
         
@@ -159,7 +170,10 @@ const ChatAI = () => {
       {/* Header */}
       <div className="px-6 pt-6 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/doctor-dashboard")}>
+          <button 
+            onClick={() => navigate("/doctor-dashboard")} 
+            className="hover:bg-gray-100 p-2 rounded-full transition-colors"
+          >
             <ChevronLeft className="w-6 h-6 text-gray-600" />
           </button>
           <h1 className="text-xl font-semibold text-gray-800">AI Medical Assistant</h1>

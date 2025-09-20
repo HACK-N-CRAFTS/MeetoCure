@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { createContext, useContext, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 
@@ -78,7 +80,7 @@ export const NotificationProvider = ({ children }) => {
 
   // ✅ Confirmation toast (Yes/No buttons)
   const confirm = useCallback((message, onConfirm, onCancel) => {
-    const id = toast.custom((t) => (
+    const id = toast.custom(() => (
       <div className="bg-white shadow-lg rounded-xl p-4 flex flex-col items-center gap-3 border">
         <p className="text-gray-800 font-medium">{message}</p>
         <div className="flex gap-2">

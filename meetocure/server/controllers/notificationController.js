@@ -1,5 +1,15 @@
 const Notification = require("../models/Notification");
 
+// Get unread notification count
+const getUnreadCount = async (req, res) => {
+  try {
+    const count = await Notification.countDocuments({ userId: req.user.id, isRead: false });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // Create a notification
 const createNotification = async ({ userId, title, message, type = "info", targetPath = "", metadata = {} }) => {
   const notif = new Notification({ userId, title, message, type, targetPath, metadata });
@@ -46,6 +56,7 @@ module.exports = {
   getMyNotifications,
   markAsRead,
   markAllAsRead,
+  getUnreadCount,
 };
 
 

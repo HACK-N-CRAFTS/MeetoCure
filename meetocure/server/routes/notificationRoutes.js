@@ -4,7 +4,10 @@
 const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/authMiddleware");
-const { getMyNotifications, markAsRead, markAllAsRead, createNotification } = require("../controllers/notificationController");
+const { getMyNotifications, markAsRead, markAllAsRead, createNotification, getUnreadCount } = require("../controllers/notificationController");
+
+// Get unread notification count
+router.get("/unread-count", protect(["patient", "doctor"]), getUnreadCount);
 
 // Fetch notifications for logged-in user
 router.get("/my", protect(["patient", "doctor"]), getMyNotifications);

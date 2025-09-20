@@ -56,12 +56,123 @@ const verifyDoctor = async (req, res) => {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // ... (keep all your existing code for data processing, file uploads, etc.)
+    // Process the form data
+    const hospitalInfo = {
+      hospitalName: req.body.hospital_hospitalName,
+      hospitalAddress: req.body.hospital_hospitalAddress,
+      contactNumber: req.body.hospital_contactNumber,
+    };
 
-    // Update doctor with verification details 
+    const bankingInfo = {
+      bankName: req.body.bank_bankName,
+      accountNumber: req.body.bank_accountNumber,
+      ifscCode: req.body.bank_ifscCode,
+      accountHolderName: req.body.bank_accountHolderName,
+      bankBranch: req.body.bank_bankBranch,
+    };
 
+    // Create verification document
+    // Parse qualifications if it's a string
+    let qualifications = [];
+    try {
+      if (typeof req.body.qualifications === 'string') {
+        const parsedQuals = JSON.parse(req.body.qualifications);
+        // Ensure each qualification has the required structure
+        qualifications = parsedQuals.map(qual => ({
+          degree: String(qual.degree || ''),
+          universityCollege: String(qual.universityCollege || ''),
+          year: String(qual.year || '')
+        }));
+      } else if (Array.isArray(req.body.qualifications)) {
+        qualifications = req.body.qualifications.map(qual => ({
+          degree: String(qual.degree || ''),
+          universityCollege: String(qual.universityCollege || ''),
+          year: String(qual.year || '')
+        }));
+      }
+    } catch (error) {
+      console.error('Error parsing qualifications:', error);
+      return res.status(400).json({ 
+        message: 'Invalid qualifications format. Each qualification must have degree, universityCollege, and year fields.',
+        details: error.message 
+      });
+    }
+
+    const verificationData = {
+      doctorId: doctorId,
+      fullName: req.body.fullName,
+      gender: req.body.gender,
+      dateOfBirth: req.body.dateOfBirth,
+      medicalCouncilRegistrationNumber: req.body.medicalCouncilRegistrationNumber,
+      medicalCouncilName: req.body.medicalCouncilName,
+      yearOfRegistration: req.body.yearOfRegistration,
+      primarySpecialization: req.body.primarySpecialization,
+      additionalSpecializations: req.body.additionalSpecializations,
+      category: req.body.category,
+      consultationFee: Number(req.body.consultationFee),
+      about: req.body.about,
+      qualifications: qualifications,
+      experienceYears: req.body.experienceYears,
+      location: {
+        city: req.body.location?.city,
+        state: req.body.location?.state,
+      },
+      aadhaarNumber: req.body.aadhaarNumber,
+      panNumber: req.body.panNumber,
+      hospitalInfo: [hospitalInfo],
+      bankingInfo: [bankingInfo],
+    };
+
+    // Handle file uploads if files are present
+    if (req.files) {
+      if (req.files.profileImage) {
+        const profileImageUrl = await uploadBufferToCloudinary(
+          req.files.profileImage[0].buffer,
+          'doctor-profiles',
+          `profile_${doctorId}`
+        );
+        verificationData.profileImage = profileImageUrl;
+      }
+
+      if (req.files.identityDocument) {
+        const identityDocUrl = await uploadBufferToCloudinary(
+          req.files.identityDocument[0].buffer,
+          'doctor-documents',
+          `identity_${doctorId}`
+        );
+        verificationData.identityDocument = identityDocUrl;
+      }
+
+      if (req.files.medicalCouncilCertificate) {
+        const councilCertUrl = await uploadBufferToCloudinary(
+          req.files.medicalCouncilCertificate[0].buffer,
+          'doctor-certificates',
+          `council_${doctorId}`
+        );
+        verificationData.medicalCouncilCertificate = councilCertUrl;
+      }
+
+      if (req.files.qualificationCertificates) {
+        const qualificationUrls = await Promise.all(
+          req.files.qualificationCertificates.map((file, index) =>
+            uploadBufferToCloudinary(
+              file.buffer,
+              'doctor-qualifications',
+              `qual_${doctorId}_${index}`
+            )
+          )
+        );
+        verificationData.qualificationCertificates = qualificationUrls;
+      }
+    }
+
+    // Create the verification document
+    const verification = await DoctorVerification.create(verificationData);
+
+    // Update doctor with verification details
+    console.log('Created verification:', verification);
     doctor.verificationDetails = verification._id;
-    
+
     if (Object.keys(hospitalInfo).length > 0) {
       doctor.hospitalInfo = hospitalInfo;
     }

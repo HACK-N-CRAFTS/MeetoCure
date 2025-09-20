@@ -18,15 +18,44 @@ const DoctorAvailability = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("doctorToken");
-        const user = JSON.parse(localStorage.getItem("doctorInfo") || "{}");
-        const doctorId = user?.doctorId;
+        const doctorInfoStr = localStorage.getItem("doctorInfo");
+        console.log("Raw doctorInfo from localStorage:", doctorInfoStr);
+        
+        if (!doctorInfoStr) {
+          console.error("No doctor info found in localStorage");
+          toast.error("Please login again");
+          navigate("/doctor/login");
+          return;
+        }
+
+        const user = JSON.parse(doctorInfoStr);
+        const doctorId = user?._id || user?.doctorId; // Check both possible ID fields
+        
+        console.log("Debug Info:", {
+          token: token ? "Token exists" : "No token found",
+          doctorInfo: user,
+          doctorId: doctorId
+        });
+
         if (!doctorId) {
+          console.error("No doctorId found in localStorage");
+          toast.error("Please login again, doctor ID not found");
+          setAvailability([]);
+          setLoading(false);
+          return;
+        }
+
+        if (!token) {
+          console.error("No token found in localStorage");
+          toast.error("Please login again, session expired");
           setAvailability([]);
           setLoading(false);
           return;
         }
 
         const base = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+        console.log("Making API request to:", `${base}/api/availability/${doctorId}`);
+        
         const res = await axios.get(
           `${base}/api/availability/${doctorId}`,
           {
@@ -36,6 +65,7 @@ const DoctorAvailability = () => {
           }
         );
 
+        console.log("Server response:", res.data);
         // backend returns availability doc; we want days array
         setAvailability(res.data.days || []);
       } catch (err) {
@@ -44,7 +74,8 @@ const DoctorAvailability = () => {
           message: err.message,
           response: err.response?.data,
           status: err.response?.status,
-          url: err.config?.url
+          url: err.config?.url,
+          headers: err.config?.headers
         });
         const status = err.response?.status;
         const message = err.response?.data?.message || "";
@@ -58,7 +89,7 @@ const DoctorAvailability = () => {
       }
     };
     fetchAvailability();
-  }, []);
+  }, [navigate]);
 
   // Sort by date ascending (works with YYYY-MM-DD) and guard against bad data
   const sortedAvailability = (Array.isArray(availability) ? availability : [])

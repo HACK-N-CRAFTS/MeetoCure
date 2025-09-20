@@ -11,6 +11,7 @@ const { Server } = require("socket.io");
 dotenv.config();
 connectDB();
 
+
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.FRONTEND_URL_2,

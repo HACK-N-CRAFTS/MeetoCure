@@ -63,9 +63,15 @@ await Slot.insertMany(slotDocs);
 const getAvailability = async (req, res) => {
   try {
     const doctorId = req.params.doctorId;
+    
+    if (!doctorId) {
+      return res.status(400).json({ message: "Doctor ID is required" });
+    }
 
+    console.log("Searching availability for doctorId:", doctorId);
 
     const availability = await Availability.findOne({ doctor: doctorId });
+    console.log("Found availability:", availability);
 
     if (!availability) {
       return res.status(404).json({ message: "No availability set yet" });
@@ -73,6 +79,7 @@ const getAvailability = async (req, res) => {
 
     res.status(200).json(availability);
   } catch (err) {
+    console.error("Error in getAvailability:", err);
     res.status(500).json({ message: err.message });
   }
 };
