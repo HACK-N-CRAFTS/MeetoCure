@@ -50,7 +50,7 @@ const Help = () => {
       title: "24/7 Phone Support",
       icon: <FaPhone className="text-2xl" />,
       description: "Call us anytime for immediate assistance",
-      contact: "+91 98765 43210",
+      contact: "+91 7981868489",
       action: "Call Now",
       color: "bg-blue-500",
       hoverColor: "hover:bg-blue-600"
@@ -59,7 +59,7 @@ const Help = () => {
       title: "Email Support",
       icon: <FaEnvelope className="text-2xl" />,
       description: "Send us an email and get a response within 2 hours",
-      contact: "support@meetocure.com",
+      contact: "meetocure2025@gmail.com",
       action: "Send Email",
       color: "bg-green-500",
       hoverColor: "hover:bg-green-600"
@@ -68,7 +68,7 @@ const Help = () => {
       title: "WhatsApp Support",
       icon: <FaWhatsapp className="text-2xl" />,
       description: "Chat with us on WhatsApp for quick help",
-      contact: "+91 98765 43210",
+      contact: "+91 7981868489",
       action: "Chat on WhatsApp",
       color: "bg-green-600",
       hoverColor: "hover:bg-green-700"

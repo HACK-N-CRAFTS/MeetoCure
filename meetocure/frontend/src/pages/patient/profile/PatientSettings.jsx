@@ -14,7 +14,6 @@ const PatientSettings = () => {
 
   const [settings, setSettings] = useState({
     notifications: {
-      push: true,
       email: true,
       sms: false,
       appointmentReminders: true,
@@ -65,43 +64,6 @@ const PatientSettings = () => {
       },
     }));
   }, []);
-
-  const handlePrivacyChange = useCallback((key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [key]: value,
-      },
-    }));
-  }, []);
-
-  const handleSecurityChange = useCallback((key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      security: {
-        ...prev.security,
-        [key]: value,
-      },
-    }));
-  }, []);
-
-  const handlePasswordChange = async () => {
-    if (passwordData.new !== passwordData.confirm) {
-      toast.error("New passwords don't match!");
-      return;
-    }
-
-    try {
-      console.log("Changing password...");
-      setShowPasswordModal(false);
-      setPasswordData({ current: "", new: "", confirm: "" });
-      toast.success("🔒 Password changed successfully!");
-    } catch (error) {
-      console.error("Failed to change password:", error);
-      toast.error("Failed to change password");
-    }
-  };
 
   const SettingSection = ({ title, icon, children }) => (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -184,12 +146,6 @@ const PatientSettings = () => {
         >
           <div className="space-y-2">
             <ToggleSwitch
-              enabled={settings.notifications.push}
-              onChange={(value) => handleNotificationChange("push", value)}
-              label="Push Notifications"
-              description="Receive push notifications on your device"
-            />
-            <ToggleSwitch
               enabled={settings.notifications.email}
               onChange={(value) => handleNotificationChange("email", value)}
               label="Email Notifications"
@@ -201,95 +157,6 @@ const PatientSettings = () => {
               label="SMS Notifications"
               description="Receive notifications via SMS"
             />
-            <ToggleSwitch
-              enabled={settings.notifications.appointmentReminders}
-              onChange={(value) =>
-                handleNotificationChange("appointmentReminders", value)
-              }
-              label="Appointment Reminders"
-              description="Get reminded about upcoming appointments"
-            />
-            <ToggleSwitch
-              enabled={settings.notifications.healthTips}
-              onChange={(value) => handleNotificationChange("healthTips", value)}
-              label="Health Tips"
-              description="Receive daily health tips and advice"
-            />
-            <ToggleSwitch
-              enabled={settings.notifications.offers}
-              onChange={(value) => handleNotificationChange("offers", value)}
-              label="Special Offers"
-              description="Get notified about special offers and discounts"
-            />
-          </div>
-        </SettingSection>
-
-        {/* Privacy Settings */}
-        <SettingSection
-          title="Privacy & Data"
-          icon={<FaShieldAlt className="text-white" />}
-        >
-          <div className="space-y-2">
-            <SelectOption
-              value={settings.privacy.profileVisibility}
-              onChange={(value) => handlePrivacyChange("profileVisibility", value)}
-              options={[
-                { value: "public", label: "Public" },
-                { value: "friends", label: "Friends Only" },
-                { value: "private", label: "Private" },
-              ]}
-              label="Profile Visibility"
-              description="Control who can see your profile information"
-            />
-            <ToggleSwitch
-              enabled={settings.privacy.shareData}
-              onChange={(value) => handlePrivacyChange("shareData", value)}
-              label="Share Data for Research"
-              description="Allow your anonymized data to be used for medical research"
-            />
-            <ToggleSwitch
-              enabled={settings.privacy.analytics}
-              onChange={(value) => handlePrivacyChange("analytics", value)}
-              label="Analytics & Improvements"
-              description="Help us improve the app by sharing usage analytics"
-            />
-          </div>
-        </SettingSection>
-
-        {/* Security Settings */}
-        <SettingSection
-          title="Security"
-          icon={<FaShieldAlt className="text-white" />}
-        >
-          <div className="space-y-2">
-            <ToggleSwitch
-              enabled={settings.security.twoFactorAuth}
-              onChange={(value) => handleSecurityChange("twoFactorAuth", value)}
-              label="Two-Factor Authentication"
-              description="Add an extra layer of security to your account"
-            />
-            <ToggleSwitch
-              enabled={settings.security.biometricLogin}
-              onChange={(value) =>
-                handleSecurityChange("biometricLogin", value)
-              }
-              label="Biometric Login"
-              description="Use fingerprint or face ID to log in"
-            />
-            <ToggleSwitch
-              enabled={settings.security.autoLock}
-              onChange={(value) => handleSecurityChange("autoLock", value)}
-              label="Auto-Lock"
-              description="Automatically lock the app after inactivity"
-            />
-            <div className="pt-3">
-              <button
-                onClick={() => setShowPasswordModal(true)}
-                className="px-4 py-2 bg-[#0A4D68] text-white rounded-lg hover:bg-[#08374f] transition-colors"
-              >
-                Change Password
-              </button>
-            </div>
           </div>
         </SettingSection>
 
@@ -375,12 +242,6 @@ const PatientSettings = () => {
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Cancel
-              </button>
-              <button
-                onClick={handlePasswordChange}
-                className="flex-1 px-4 py-2 bg-[#0A4D68] text-white rounded-lg hover:bg-[#08374f] transition-colors"
-              >
-                Change Password
               </button>
             </div>
           </div>
