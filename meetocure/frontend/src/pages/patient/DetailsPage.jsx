@@ -17,7 +17,15 @@ const DetailsPage = () => {
     const fetchDoctor = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/doctor/${id}`);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Authentication token not found");
+        }
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/doctor/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         setDoctor(res.data);
         setError(null);
       } catch (err) {

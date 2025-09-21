@@ -14,7 +14,7 @@ const DoctorCard = ({ doctor }) => (
           className="w-full h-full object-cover object-top"
         />
       </div>
-      <h3 className="text-lg font-semibold text-[#1F2A37]">
+      <h3 className="text-lg font-semibold text-[#1F2A37] truncate">
         {doctor.fullName || "Unnamed Doctor"}
       </h3>
       <p className="text-sm text-gray-500">

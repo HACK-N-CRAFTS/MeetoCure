@@ -15,7 +15,7 @@ const Availability = require("../models/Availability");
 
 
 // getting booked appointments based on doctor and specific date
-router.post("/search/:doctorId", async (req, res) => {
+router.post("/search/:doctorId",protect(["doctor" , "patient"]) , async (req, res) => {
   try {
     const { date } = req.body;
     const { doctorId } = req.params;

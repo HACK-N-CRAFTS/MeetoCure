@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { FaMapMarkerAlt, FaCrosshairs } from "react-icons/fa";
+import React, { useCallback, useState, useEffect } from "react";
+import { FaMapMarkerAlt, FaCrosshairs, FaArrowLeft, FaSpinner } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -11,9 +11,18 @@ const Location = () => {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const navigate = useNavigate();
 
   const GOOGLE_API_KEY = import.meta?.env?.VITE_GOOGLE_MAPS_API_KEY || null;
+
+  useEffect(() => {
+    const savedLocation = localStorage.getItem("selectedCity");
+    if (savedLocation) {
+      setLocation(savedLocation);
+    }
+  }, []);
 
   const getCityFromGoogle = async (lat, lng) => {
     if (!GOOGLE_API_KEY) return null;
@@ -22,14 +31,14 @@ const Location = () => {
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_API_KEY}`
       );
       const data = await res.json();
-      if (data.status === "OK" && data.results && data.results.length > 0) {
+      if (data.status === "OK" && data.results?.length > 0) {
         const comp = data.results[0].address_components || [];
         const city =
           comp.find((c) => c.types.includes("locality"))?.long_name ||
           comp.find((c) => c.types.includes("administrative_area_level_2"))?.long_name ||
           comp.find((c) => c.types.includes("administrative_area_level_1"))?.long_name ||
           data.results[0].formatted_address;
-        return { place: city, formatted: data.results[0].formatted_address };
+        return { place: city, formatted: data.results[0].formatted_address, provider: "google" };
       }
     } catch (err) {
       console.warn("Google Geocoding failed:", err);
@@ -40,13 +49,14 @@ const Location = () => {
   const getCityFromNominatim = async (lat, lng) => {
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+        { headers: { "User-Agent": "LocationApp/1.0" } }
       );
       const data = await res.json();
-      if (data) {
-        const addr = data.address || {};
+      if (data?.address) {
+        const addr = data.address;
         const city = addr.city || addr.town || addr.village || addr.county || data.display_name;
-        return { place: city, formatted: data.display_name };
+        return { place: city, formatted: data.display_name, provider: "nominatim" };
       }
     } catch (err) {
       console.warn("Nominatim reverse geocode failed:", err);
@@ -60,83 +70,101 @@ const Location = () => {
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
       );
       const data = await res.json();
-      const city =
-        data.locality || data.city || data.principalSubdivision || data.countryName || null;
-      return { place: city, formatted: city };
+      const city = data.locality || data.city || data.principalSubdivision || data.countryName;
+      return city ? { place: city, formatted: city, provider: "bigdatacloud" } : null;
     } catch (err) {
       console.warn("BigDataCloud reverse geocode failed:", err);
       return null;
     }
   };
 
-  // Try multiple reverse geocoders in preferred order and return first useful result
   const reverseGeocode = async (lat, lng) => {
-    // 1) Google (if key)
-    const tryOrder = [];
-    if (GOOGLE_API_KEY) tryOrder.push(getCityFromGoogle);
-    tryOrder.push(getCityFromNominatim, getCityFromBigDataCloud);
+    const providers = GOOGLE_API_KEY 
+      ? [getCityFromGoogle, getCityFromNominatim, getCityFromBigDataCloud]
+      : [getCityFromNominatim, getCityFromBigDataCloud];
 
-    for (const fn of tryOrder) {
+    for (const provider of providers) {
       try {
-        const r = await fn(lat, lng);
-        if (r && r.place) return { place: r.place, formatted: r.formatted || r.place, provider: fn.name };
+        const result = await provider(lat, lng);
+        if (result?.place) return result;
       } catch (e) {
-        // continue
-
         console.warn("Reverse geocode error:", e);
       }
     }
     return null;
   };
 
-  const handleCurrentLocation = async (opts = {}) => {
+  const handleCurrentLocation = async () => {
     if (!navigator.geolocation) {
-      toast.error("Geolocation not supported by your browser.");
+      toast.error("Geolocation is not supported by your browser");
       return;
     }
 
     setLoading(true);
-    const loadingToast = toast.loading("Detecting your location...");
+    const loadingToast = toast.loading("Detecting location...", { duration: 30000 });
+
+    const timeoutId = setTimeout(() => {
+      toast.dismiss(loadingToast);
+      toast.error("Location detection timed out. Please try again.");
+      setLoading(false);
+    }, 30000);
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        clearTimeout(timeoutId);
         const { latitude, longitude, accuracy: acc } = position.coords;
-        console.log("Raw position:", position.coords);
+        
         setCoords({ lat: latitude, lng: longitude });
         setAccuracy(acc);
 
-        // reverse geocode tries
         const result = await reverseGeocode(latitude, longitude);
+        
         if (result) {
           setLocation(result.place);
           setSource(result.provider);
           localStorage.setItem("selectedCity", result.place);
-          toast.success(`Location set to ${result.place}`);
-          navigate("/patient-dashboard");
+          toast.success(`Location detected: ${result.place}`);
+          setTimeout(() => navigate("/patient-dashboard"), 1000);
         } else {
-          setSource("none");
-          toast.error("City not detected from coordinates.");
+          setSource("coordinates");
+          toast.error("Could not determine city from location");
         }
 
         setLoading(false);
         toast.dismiss(loadingToast);
       },
       async (error) => {
+        clearTimeout(timeoutId);
         console.warn("Geolocation error:", error);
-        let errorMessage = "Failed to retrieve your location.";
-        if (error.code === 1) {
-          errorMessage = "Location permission denied.";
-          // fallback to IP-based lookup
+        
+        let errorMessage = "Failed to get location";
+        let fallbackAttempted = false;
+
+        switch (error.code) {
+          case 1:
+            errorMessage = "Location access denied. Trying IP detection...";
+            fallbackAttempted = true;
+            break;
+          case 2:
+            errorMessage = "Location unavailable";
+            break;
+          case 3:
+            errorMessage = "Location request timed out";
+            break;
+        }
+
+        if (fallbackAttempted) {
           try {
             const ipRes = await fetch("https://ipapi.co/json/");
             const data = await ipRes.json();
             const city = data.city || data.region || data.country_name;
+            
             if (city) {
               setLocation(city);
               setSource("ip");
               localStorage.setItem("selectedCity", city);
-              toast.success(`Location set to ${city} (from IP)`);
-              navigate("/patient-dashboard");
+              toast.success(`Location set to ${city} (via IP)`);
+              setTimeout(() => navigate("/patient-dashboard"), 1000);
               setLoading(false);
               toast.dismiss(loadingToast);
               return;
@@ -144,117 +172,251 @@ const Location = () => {
           } catch (e) {
             console.warn("IP fallback failed", e);
           }
-        } else if (error.code === 2) {
-          errorMessage = "Location unavailable.";
-        } else if (error.code === 3) {
-          errorMessage = "Location request timed out.";
         }
+
         toast.error(errorMessage);
         setLoading(false);
         toast.dismiss(loadingToast);
       },
       {
         enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0,
-        ...opts,
+        timeout: 25000,
+        maximumAge: 300000,
       }
     );
   };
 
- 
-function debounce(func, delay) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func(...args), delay);
-  };
-}
+  const debounce = useCallback((func, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  }, []);
 
+  const handleCitySearch = useCallback(
+    debounce(async (query) => {
+      if (!query || query.length < 2) {
+        setSearchResults([]);
+        setSearchLoading(false);
+        return;
+      }
 
-const handleCitySearch = useCallback(debounce(async (query) => {
-  if (!query || query.length < 2) {
-    setSearchResults([]);
-    return;
-  }
-  try {
-    const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5`
-    );
-    const data = await res.json();
-    if (data?.results) {
-      setSearchResults(data.results.map((city) => city.name));
-    }
-  } catch (err) {
-    console.error("City search failed", err);
-  }
-}, 300), []);
-
+      setSearchLoading(true);
+      try {
+        const res = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+            query
+          )}&count=8&language=en`
+        );
+        const data = await res.json();
+        
+        if (data?.results) {
+          const cities = data.results.map((city) => ({
+            name: city.name,
+            country: city.country,
+            admin1: city.admin1,
+            displayName: `${city.name}${city.admin1 ? `, ${city.admin1}` : ""}${
+              city.country ? `, ${city.country}` : ""
+            }`,
+          }));
+          setSearchResults(cities);
+        } else {
+          setSearchResults([]);
+        }
+      } catch (err) {
+        console.error("City search failed:", err);
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300),
+    []
+  );
 
   const handleSelectCity = (city) => {
-    setLocation(city);
-    localStorage.setItem("selectedCity", city);
+    const cityName = typeof city === "string" ? city : city.name;
+    setLocation(cityName);
+    localStorage.setItem("selectedCity", cityName);
     setSearch("");
     setSearchResults([]);
-    toast.success(`City set to ${city}`);
-    navigate("/patient-dashboard");
+    setSelectedIndex(-1);
+    toast.success(`Location set to ${cityName}`);
+    setTimeout(() => navigate("/patient-dashboard"), 800);
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && searchResults.length > 0) {
-      handleSelectCity(searchResults[0]);
+    if (searchResults.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setSelectedIndex((prev) => 
+          prev < searchResults.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setSelectedIndex((prev) => 
+          prev > 0 ? prev - 1 : searchResults.length - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (selectedIndex >= 0) {
+          handleSelectCity(searchResults[selectedIndex]);
+        } else if (searchResults.length > 0) {
+          handleSelectCity(searchResults[0]);
+        }
+        break;
+      case "Escape":
+        setSearch("");
+        setSearchResults([]);
+        setSelectedIndex(-1);
+        break;
     }
   };
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#F0F4F8] px-4">
-      <div className="bg-white shadow-2xl rounded-3xl p-6 w-full max-w-xl transition-all duration-300">
-        <h2 className="text-2xl font-bold text-[#0A4D68] mb-4 text-center">Select Your Location</h2>
-
-        <div className="flex flex-col items-center text-[#0A4D68] text-base mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <FaMapMarkerAlt className="text-xl" />
-            <span className="font-medium">{loading ? "Detecting location..." : location}</span>
-          </div>
-
-          <div className="text-xs text-gray-500">
-            {coords ? `coords: ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)} • accuracy: ${accuracy ? `${Math.round(accuracy)}m` : "n/a"}` : ""}
-            {source ? ` • source: ${source}` : ""}
-          </div>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-card border border-border rounded-lg p-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={handleBack}
+            className="flex items-center justify-center w-10 h-10 border border-border rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+            aria-label="Go back"
+            disabled={loading}
+          >
+            <FaArrowLeft className="text-muted-foreground text-sm" />
+          </button>
+          <h1 className="text-xl font-semibold text-foreground">Location Selection</h1>
+          <div className="w-10"></div>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search for a city..."
-          value={search}
-          onChange={(e) => {
-            const v = e.target.value;
-            setSearch(v);           
-            handleCitySearch(v);    
-          }}
-          onKeyDown={handleKeyDown}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A4D68] mb-4 text-base"
-        />
-
-        <div
-          onClick={() => handleCurrentLocation({ enableHighAccuracy: true })}
-          className={`flex items-center justify-center text-[#0A4D68] font-semibold cursor-pointer mb-4 hover:text-[#08374f] transition ${loading ? "opacity-50 pointer-events-none" : ""}`}
-        >
-          <FaCrosshairs className="mr-2 text-lg" />
-          Use my current location
-        </div>
-
-        <div className="space-y-3">
-          {searchResults.map((city, idx) => (
-            <div
-              key={idx}
-              onClick={() => handleSelectCity(city)}
-              className="flex items-center gap-3 py-3 px-4 rounded-xl border cursor-pointer hover:bg-gray-100 text-[#1F2A37] transition"
-            >
-              <FaMapMarkerAlt className="text-[#0A4D68]" />
-              <span className="text-base font-medium">{city}</span>
+        {/* Current Location Display */}
+        <div className="mb-6 p-4 border border-border bg-muted rounded-md">
+          <div className="flex items-center gap-3 mb-2">
+            <FaMapMarkerAlt className="text-primary text-lg flex-shrink-0" />
+            <span className="font-medium text-foreground">
+              {loading ? "Detecting location..." : location}
+            </span>
+          </div>
+          
+          {(coords || source) && (
+            <div className="text-xs text-muted-foreground pl-6">
+              {coords && (
+                <div className="font-mono">
+                  {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+                  {accuracy && ` • ${Math.round(accuracy)}m accuracy`}
+                </div>
+              )}
+              {source && <div>Source: {source}</div>}
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Search Input */}
+        <div className="mb-6">
+          <label htmlFor="location-search" className="block text-sm font-medium text-foreground mb-2">
+            Search for a location
+          </label>
+          <div className="relative">
+            <input
+              id="location-search"
+              type="text"
+              placeholder="Enter city name..."
+              value={search}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearch(value);
+                setSelectedIndex(-1);
+                handleCitySearch(value);
+              }}
+              onKeyDown={handleKeyDown}
+              className="w-full px-4 py-3 border border-input bg-background rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground"
+              disabled={loading}
+              autoComplete="off"
+            />
+            
+            {searchLoading && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <FaSpinner className="animate-spin text-primary text-sm" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* GPS Location Button */}
+        <button
+          onClick={handleCurrentLocation}
+          disabled={loading}
+          className={`w-full flex items-center justify-center gap-3 py-3 px-4 border-2 border-primary text-primary font-medium rounded-md hover:bg-primary hover:text-primary-foreground transition-colors mb-6 ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          {loading ? (
+            <FaSpinner className="animate-spin" />
+          ) : (
+            <FaCrosshairs />
+          )}
+          <span>{loading ? "Detecting..." : "Use Current Location"}</span>
+        </button>
+
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="border border-border rounded-md overflow-hidden">
+            <div className="max-h-64 overflow-y-auto">
+              {searchResults.map((city, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleSelectCity(city)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-left border-b border-border last:border-b-0 transition-colors ${
+                    idx === selectedIndex
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-accent hover:text-accent-foreground bg-background text-foreground"
+                  }`}
+                >
+                  <FaMapMarkerAlt 
+                    className={`flex-shrink-0 ${
+                      idx === selectedIndex ? "text-primary-foreground" : "text-primary"
+                    }`} 
+                  />
+                  <div>
+                    <div className="font-medium">{city.name}</div>
+                    {city.admin1 && (
+                      <div className={`text-sm ${
+                        idx === selectedIndex ? "text-primary-foreground/70" : "text-muted-foreground"
+                      }`}>
+                        {city.admin1}{city.country && `, ${city.country}`}
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No Results */}
+        {search && searchResults.length === 0 && !searchLoading && (
+          <div className="border border-border rounded-md p-8 text-center bg-muted">
+            <FaMapMarkerAlt className="text-muted-foreground text-2xl mb-3 mx-auto" />
+            <p className="text-foreground font-medium">No locations found</p>
+            <p className="text-muted-foreground text-sm mt-1">Try a different search term</p>
+          </div>
+        )}
+
+        {/* Instructions */}
+        <div className="mt-6 p-4 bg-secondary rounded-md border border-border">
+          <p className="text-secondary-foreground text-sm">
+            <strong>Tip:</strong> Use the search field above or click "Use Current Location" 
+            to automatically detect your position.
+          </p>
         </div>
       </div>
     </div>
@@ -262,4 +424,3 @@ const handleCitySearch = useCallback(debounce(async (query) => {
 };
 
 export default Location;
-

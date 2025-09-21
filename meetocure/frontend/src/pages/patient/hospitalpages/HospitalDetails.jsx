@@ -16,7 +16,15 @@ const HospitalDetails = () => {
     const fetchHospital = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/hospitals/hospitallogins`);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("Authentication token not found");
+        }
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/hospitals/hospitallogins`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         const data = await res.json();
         const found = data.find(h => h._id === id);
         setHospital(found || null);

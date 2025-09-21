@@ -12,19 +12,19 @@ const {
 } = require("../controllers/hospitalController");
 
 // Add doctors to a hospital login document
-router.post("/hospitallogins/:id/doctors", addDoctorsToHospitalLogin);
+router.post("/hospitallogins/:id/doctors", protect(["doctor" , "patient"]) , addDoctorsToHospitalLogin);
 
 // Get doctors for a hospital login by hospital id
-router.get("/hospitallogins/:id/doctors", getDoctorsForHospitalLogin);
+router.get("/hospitallogins/:id/doctors", protect(["doctor" , "patient"]) , getDoctorsForHospitalLogin);
 
 // Get all hospitals from HospitalLogin collection
-router.get("/hospitallogins", getAllHospitalLogins);
+router.get("/hospitallogins", protect(["doctor" , "patient"]) , getAllHospitalLogins);
 
 // Doctor adds hospital
 router.post("/", protect(["doctor"]), createHospital);
 
 // All hospitals
-router.get("/", getAllHospitals);
+router.get("/",protect(["doctor" , "patient"]), getAllHospitals);
 
 // Place static routes before dynamic :id to avoid conflicts
 router.get("/filter", filterHospitals);

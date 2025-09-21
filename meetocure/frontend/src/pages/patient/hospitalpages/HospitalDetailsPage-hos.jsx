@@ -44,7 +44,15 @@ const HospitalDetailsPage = ({ hospitalId, onToggleFavorite }) => {
     useEffect(() => {
         const fetchHospital = async () => {
             try {
-               const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'https://www.meetocure.com'}/api/hospitals`);
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("Authentication token not found");
+                }
+                const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'https://www.meetocure.com'}/api/hospitals`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 setHospital(res.data);
             } catch (err) {
                 console.error("Error fetching hospital data:", err);

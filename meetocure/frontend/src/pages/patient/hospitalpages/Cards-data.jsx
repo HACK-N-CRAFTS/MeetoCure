@@ -78,7 +78,15 @@ const App = () => {
             try {
                 setLoading(true);
                 // Fixed localhost URL - remove https for localhost
-                const response = await fetch('http://localhost:5000/api/hospitals/hospitallogins');
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    throw new Error("Authentication token not found");
+                }
+                const response = await fetch('http://localhost:5000/api/hospitals/hospitallogins', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

@@ -161,7 +161,15 @@ const DateTime = () => {
     setSlotsError("");
     try {
       const base = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-      const res = await axios.get(`${base}/api/availability/${encodeURIComponent(doctorId)}`);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+      const res = await axios.get(`${base}/api/availability/${encodeURIComponent(doctorId)}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = res.data;
       const days = data?.days || [];
       setAvailabilityDays(days);

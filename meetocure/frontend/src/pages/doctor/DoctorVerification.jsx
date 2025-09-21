@@ -146,6 +146,11 @@ export const DoctorVerification = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Client-side checks for required fields
+    if (!formData.location.city || !formData.location.state) {
+      return toast.error("Both city and state are required in location details");
+    }
+    
     // Client-side checks for required files
     if (!profileImageFile) return toast.error("Profile image is required");
     if (!identityDocumentFile) return toast.error("Aadhaar image is required");
