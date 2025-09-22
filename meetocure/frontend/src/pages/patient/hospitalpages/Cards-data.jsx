@@ -82,7 +82,7 @@ const App = () => {
                 if (!token) {
                     throw new Error("Authentication token not found");
                 }
-                const response = await fetch('http://localhost:5000/api/hospitals/hospitallogins', {
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/hospitals/hospitallogins`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }

@@ -45,9 +45,7 @@ const App = () => {
       setLoading(true);
       setError('');
       
-      console.log('Fetching hospitals from: http://localhost:5000/api1/hospitals/list');
-      
-      const response = await fetch('http://localhost:5000/api1/hospitals/list', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api1/hospitals/list`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
