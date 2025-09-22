@@ -19,10 +19,10 @@ const DoctorAvailability = () => {
         setLoading(true);
         const token = localStorage.getItem("doctorToken");
         const doctorInfoStr = localStorage.getItem("doctorInfo");
-        console.log("Raw doctorInfo from localStorage:", doctorInfoStr);
+      
         
         if (!doctorInfoStr) {
-          console.error("No doctor info found in localStorage");
+          
           toast.error("Please login again");
           navigate("/doctor/login");
           return;
@@ -30,12 +30,7 @@ const DoctorAvailability = () => {
 
         const user = JSON.parse(doctorInfoStr);
         const doctorId = user?._id || user?.doctorId; // Check both possible ID fields
-        
-        console.log("Debug Info:", {
-          token: token ? "Token exists" : "No token found",
-          doctorInfo: user,
-          doctorId: doctorId
-        });
+       
 
         if (!doctorId) {
           console.error("No doctorId found in localStorage");
@@ -53,8 +48,8 @@ const DoctorAvailability = () => {
           return;
         }
 
-        const base = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-        console.log("Making API request to:", `${base}/api/availability/${doctorId}`);
+        const base = import.meta.env.VITE_BACKEND_URL;
+       
         
         const res = await axios.get(
           `${base}/api/availability/${doctorId}`,
@@ -65,7 +60,7 @@ const DoctorAvailability = () => {
           }
         );
 
-        console.log("Server response:", res.data);
+   
         // backend returns availability doc; we want days array
         setAvailability(res.data.days || []);
       } catch (err) {

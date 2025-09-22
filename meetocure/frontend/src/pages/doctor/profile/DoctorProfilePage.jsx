@@ -68,7 +68,6 @@ const DoctorProfilePage = () => {
     const fetchDoctorInfo = async () => {
       try {
         const token = localStorage.getItem("doctorToken");
-        console.log(token)
         const res = await fetch(`${API_BASE_URL}/api/doctor/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -76,7 +75,6 @@ const DoctorProfilePage = () => {
         });
         const data = await res.json();
         setDoctorInfo(data);
-        console.log("Fetched doctor info:", data);
       } catch (error) {
         console.error("Failed to fetch doctor info:", error);
       }

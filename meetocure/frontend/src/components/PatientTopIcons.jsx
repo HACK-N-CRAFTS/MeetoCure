@@ -34,8 +34,7 @@ const PatientTopIcons = () => {
       >
         <FaBell className="text-2xl text-[#0A4D68] group-hover:text-[#08374f] transition duration-200" />
         {/* Notification Dot */}
-        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-ping" />
-        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+       
       </div>
     </div>
   );
