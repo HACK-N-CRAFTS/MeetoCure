@@ -10,14 +10,25 @@ const http = require("http");
 const { Server } = require("socket.io");
 dotenv.config();
 connectDB();
+
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL
+];
+
 const app = express();
 
-// Allow all origins with credentials
 app.use(cors({
-  origin: '*',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.filter(Boolean).includes(origin)) {
+      return callback(null, true);
+    }
+    console.log("Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: "10mb" }));
@@ -49,7 +60,7 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: allowedOrigins,
     credentials: true,
   },
   path: "/socket.io",
