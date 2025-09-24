@@ -31,7 +31,7 @@ ENV/
 chroma_db2/
 
 # Environment variables
-.env
+# .env
 
 # Node modules / dist (if frontend present)
 node_modules/
