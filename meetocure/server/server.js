@@ -10,26 +10,9 @@ const http = require("http");
 const { Server } = require("socket.io");
 dotenv.config();
 connectDB();
-
-
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173",
-];
-
 const app = express();
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.filter(Boolean).includes(origin)) {
-      return callback(null, true);
-    }
-    console.log("Blocked by CORS:", origin);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
+app.use(cors());
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
