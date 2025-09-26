@@ -27,6 +27,7 @@ const normalizePhone = (p) => {
 // Send OTP
 // Send OTP
 exports.sendOtp = async (req, res) => {
+  console.log("working sending");
   try {
     const phone = normalizePhone(req.body.phone);
 

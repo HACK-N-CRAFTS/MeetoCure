@@ -15,7 +15,7 @@ connectDB();
 const allowedOrigins = [
   "http://localhost:5173",
   "https://meetocure.com",
-  "http://13.201.91.246:5173"
+  "http://13.201.91.246:5173",
   process.env.FRONTEND_URL
 ];
 
