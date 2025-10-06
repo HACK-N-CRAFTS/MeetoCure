@@ -10,6 +10,9 @@ const {
   acceptAppointment,
   completeAppointment,
   getPatientAppointments,
+  submitAppointmentRating,
+  patientCancelAppointment,
+  getDoctorRatings
 } = require("../controllers/appointmentController");
 const Availability = require("../models/Availability");
 
@@ -63,6 +66,14 @@ router.put("/:id/accept", protect(["doctor"]), acceptAppointment);
 //Doctor completes appointment
 router.put("/:id/complete", protect(["doctor"]), completeAppointment);
 
+// Patient cancels appointment
+router.put("/:id/patient-cancel", protect(["patient"]), patientCancelAppointment);
+
+// Submit appointment rating and feedback
+router.post("/:appointmentId/rate", protect(["patient"]), submitAppointmentRating);
+
+// Get doctor's rating statistics
+router.get("/doctor/:id/ratings", protect(["doctor", "patient"]), getDoctorRatings);
 
 
 module.exports = router;

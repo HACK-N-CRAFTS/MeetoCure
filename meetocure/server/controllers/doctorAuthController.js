@@ -3,29 +3,50 @@ const jwt = require("jsonwebtoken");
 const Doctor = require("../models/DoctorShema");
 const Otp = require("../models/Otp");
 const Patient = require("../models/Patient");
-const twilio = require("twilio");
+// const twilio = require("twilio"); // Commented out for dev mode
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID } = process.env;
+// const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_VERIFY_SERVICE_SID } = process.env;
+// const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
-const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+// ========== GENERATE 6-DIGIT OTP ==========
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
-
-// ========== SEND OTP ==========
-const sendOtp =async (req, res) => {
+// ========== SEND OTP (DEVELOPMENT MODE) ==========
+const sendOtp = async (req, res) => {
   try {
     const phone = req.body.phone;
     if (!phone) return res.status(400).json({ message: "Phone required" });
 
-    // block if this number is already registered as a patient
+    // Block if this number is already registered as a patient
     const existingPatient = await Patient.findOne({ phone });
     if (existingPatient) {
       return res.status(400).json({ message: "This phone is already registered as a patient" });
     }
 
-    // Send OTP via Twilio Verify
-    await client.verify.v2.services(TWILIO_VERIFY_SERVICE_SID)
-      .verifications.create({ to: phone, channel: "sms" });
+    // Generate mock OTP
+    const otpCode = generateOTP();
+    
+    // Save OTP to database with 5-minute expiry
+    await Otp.findOneAndUpdate(
+      { phone },
+      { 
+        phone, 
+        otp: otpCode, 
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+      },
+      { upsert: true, new: true }
+    );
+
+    // ⭐ LOG OTP TO CONSOLE FOR DEVELOPMENT
+    console.log("═══════════════════════════════════");
+    console.log("📱 DEVELOPMENT MODE - OTP SENT");
+    console.log("Phone:", phone);
+    console.log("OTP Code:", otpCode);
+    console.log("═══════════════════════════════════");
 
     const doctor = await Doctor.findOne({ mobileNumber: phone });
 
@@ -33,6 +54,8 @@ const sendOtp =async (req, res) => {
       success: true,
       message: "OTP sent successfully",
       registrationStatus: doctor ? doctor.registrationStatus : "under review by hospital",
+      // Remove this line in production: 
+      devOtp: otpCode // Only for development testing
     });
   } catch (err) {
     console.error("Doctor Send OTP Error:", err);
@@ -40,7 +63,7 @@ const sendOtp =async (req, res) => {
   }
 };
 
-// ========== VERIFY OTP ==========
+// ========== VERIFY OTP (DEVELOPMENT MODE) ==========
 const verifyOtp = async (req, res) => {
   try {
     const phone = req.body.phone;
@@ -50,11 +73,28 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Phone and OTP required" });
     }
 
-    const check = await client.verify.v2.services(TWILIO_VERIFY_SERVICE_SID)
-      .verificationChecks.create({ to: phone, code });
-    if (check.status !== "approved") {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+    // Find OTP from database
+    const otpRecord = await Otp.findOne({ phone });
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: "OTP not found. Please request a new one." });
     }
+
+    // Check if OTP is expired
+    if (new Date() > otpRecord.expiresAt) {
+      await Otp.deleteOne({ phone });
+      return res.status(400).json({ message: "OTP has expired. Please request a new one." });
+    }
+
+    // Verify OTP
+    if (otpRecord.otp !== code) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    // Delete OTP after successful verification
+    await Otp.deleteOne({ phone });
+
+    console.log("✅ OTP Verified Successfully for:", phone);
 
     return res.json({ success: true, message: "OTP verified successfully" });
   } catch (err) {
@@ -86,6 +126,7 @@ const doctorAuth = async (req, res) => {
         mobileNumber,
         registrationStatus: "under review by hospital",
       });
+      
       // Send welcome notification to doctor
       try {
         const { createNotification } = require("./notificationController");

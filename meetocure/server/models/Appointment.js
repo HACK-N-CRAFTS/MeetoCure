@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const appointmentSchema = new mongoose.Schema(
   {
-
     patient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
@@ -13,8 +12,6 @@ const appointmentSchema = new mongoose.Schema(
       ref: "Doctor",
       required: true,
     },
-
- 
     patientInfo: {
       name: { type: String, required: true },
       gender: { type: String, enum: ["male", "female", "other"], required: true },
@@ -25,7 +22,6 @@ const appointmentSchema = new mongoose.Schema(
         enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
         default: null,
       },
-
     },
 
     // Medical Records
@@ -57,10 +53,40 @@ const appointmentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "completed", "cancelled"],
+      enum: ["pending", "accepted", "completed", "cancelled", "patient-cancelled"],
       default: "pending",
     },
     reason: { type: String, default: "" },
+
+    // Patient Cancellation Details
+    patientCancellation: {
+      reason: { type: String, default: null },
+      cancelledAt: { type: Date, default: null },
+      isPatientCancelled: { type: Boolean, default: false }
+    },
+
+    // Rating and Feedback
+    rating: {
+      score: { type: Number, min: 1, max: 5, default: null },
+      feedback: { type: String, maxlength: 500, default: null },
+      submittedAt: { type: Date, default: null }
+    },
+
+    // Cancellation info
+    cancellation: {
+      reason: { type: String, default: null },
+      cancelledBy: { 
+        type: String, 
+        enum: ["patient", "doctor", "system"],
+        default: null 
+      },
+      cancelledAt: { type: Date, default: null },
+      cancellationType: {
+        type: String,
+        enum: ["doctor-cancelled", "patient-cancelled", "system-cancelled"],
+        default: null
+      }
+    },
 
     // Payment Integration
     payment: {

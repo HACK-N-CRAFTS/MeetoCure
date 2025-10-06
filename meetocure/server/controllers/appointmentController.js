@@ -145,12 +145,18 @@ const getDoctorAppointments = async (req, res) => {
       status: a.status,
       name: a.patient?.name || (a.patientInfo && a.patientInfo.name) || "—",
       reason: a.reason || a.patientInfo?.reason || "",
-      date: a.appointment_date, // keep date if frontend needs it for calendar
-      patientInfo: a.patientInfo || {}, // Include full patient info
-      patient: a.patient || {} ,// Include patient data for fallback
+      date: a.appointment_date,
+      patientInfo: a.patientInfo || {},
+      patient: a.patient || {},
       medicalRecords: a.medicalRecords || [],
       createdAt: a.createdAt,
-      payment: a.payment || { amount: 0, currency: "USD", status: "pending" }
+      payment: a.payment || { amount: 0, currency: "USD", status: "pending" },
+      // Include patient cancellation details
+      patientCancellation: a.patientCancellation || null,
+      cancellation: a.cancellation || null,
+      cancellationReason: a.status === "patient-cancelled" ? 
+        a.patientCancellation?.reason || a.cancellation?.reason || "No reason provided" : 
+        null
     }));
     // console.log(minimal);
 
@@ -482,6 +488,245 @@ const completeAppointment = async (req, res) => {
   }
 };
  
+// Submit appointment rating and feedback
+const submitAppointmentRating = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { rating, feedback } = req.body;
+    const patientId = req.user.id;
+
+    // Input validation
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Rating must be between 1 and 5"
+      });
+    }
+
+    // Find appointment
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found"
+      });
+    }
+
+    // Verify this is the patient's appointment
+    if (appointment.patient.toString() !== patientId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to rate this appointment"
+      });
+    }
+
+    // Verify appointment is completed
+    if (appointment.status !== "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Can only rate completed appointments"
+      });
+    }
+
+    // Check if already rated
+    if (appointment.rating && appointment.rating.submittedAt) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment has already been rated"
+      });
+    }
+
+    // Update appointment with rating
+    appointment.rating = {
+      score: rating,
+      feedback: feedback || null,
+      submittedAt: new Date()
+    };
+
+    await appointment.save();
+
+    // Notify doctor about new rating
+    try {
+      await createNotification({
+        user: appointment.doctor,
+        title: "New Appointment Rating",
+        message: `You received a ${rating}-star rating for your appointment on ${appointment.appointment_date.toLocaleDateString()}`,
+        type: "info",
+        targetPath: "/doctor/appointments",
+        metadata: { appointmentId: appointment._id, role: "doctor" }
+      });
+    } catch (notificationError) {
+      console.warn("Failed to create rating notification:", notificationError?.message);
+    }
+
+    return res.json({
+      success: true,
+      message: "Rating submitted successfully",
+      data: appointment
+    });
+  } catch (error) {
+    console.error("Error submitting rating:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while submitting the rating"
+    });
+  }
+};
+
+// Patient cancels appointment
+const patientCancelAppointment = async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const patientId = req.user.id;
+    const { reason } = req.body;
+
+    // Find the appointment
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found"
+      });
+    }
+
+    // Verify this is the patient's appointment
+    if (appointment.patient.toString() !== patientId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to cancel this appointment"
+      });
+    }
+
+    // Check if appointment can be cancelled
+    if (appointment.status === "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot cancel a completed appointment"
+      });
+    }
+
+    if (appointment.status === "cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment is already cancelled"
+      });
+    }
+
+    // Calculate time until appointment
+    const appointmentTime = new Date(appointment.appointment_date);
+    const [hours, minutes] = appointment.appointment_time.split(":").map(Number);
+    appointmentTime.setHours(hours, minutes);
+    
+    const now = new Date();
+    const hoursUntilAppointment = (appointmentTime - now) / (1000 * 60 * 60);
+
+    // Optional: Check cancellation policy (e.g., must cancel 24 hours in advance)
+    if (hoursUntilAppointment < 24) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointments must be cancelled at least 24 hours in advance"
+      });
+    }
+
+    // Update appointment with patient cancellation details
+    appointment.status = "patient-cancelled";
+    appointment.patientCancellation = {
+      reason: reason || null,
+      cancelledAt: new Date(),
+      isPatientCancelled: true
+    };
+    appointment.cancellation = {
+      reason: reason || null,
+      cancelledBy: "patient",
+      cancelledAt: new Date(),
+      cancellationType: "patient-cancelled"
+    };
+
+    await appointment.save();
+
+    // Notify doctor about cancellation
+    try {
+      await createNotification({
+        user: appointment.doctor,
+        title: "Appointment Cancelled",
+        message: `Patient cancelled appointment scheduled for ${appointment.appointment_date.toLocaleDateString()} at ${appointment.appointment_time}`,
+        type: "warning",
+        targetPath: "/doctor/appointments",
+        metadata: { appointmentId: appointment._id, role: "doctor" }
+      });
+    } catch (notificationError) {
+      console.warn("Failed to create cancellation notification:", notificationError?.message);
+    }
+
+    return res.json({
+      success: true,
+      message: "Appointment cancelled successfully",
+      data: appointment
+    });
+  } catch (error) {
+    console.error("Error cancelling appointment:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while cancelling the appointment"
+    });
+  }
+};
+
+// Get doctor's rating statistics
+const getDoctorRatings = async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+
+    // Find all completed appointments with ratings for this doctor
+    const ratedAppointments = await Appointment.find({
+      doctor: doctorId,
+      status: "completed",
+      "rating.score": { $exists: true }
+    });
+
+    // Calculate statistics
+    const totalRatings = ratedAppointments.length;
+    const averageRating = totalRatings > 0
+      ? ratedAppointments.reduce((sum, app) => sum + app.rating.score, 0) / totalRatings
+      : 0;
+
+    // Count ratings by score
+    const ratingDistribution = {
+      1: 0, 2: 0, 3: 0, 4: 0, 5: 0
+    };
+    ratedAppointments.forEach(app => {
+      ratingDistribution[app.rating.score]++;
+    });
+
+    // Get recent feedback
+    const recentFeedback = ratedAppointments
+      .filter(app => app.rating.feedback)
+      .sort((a, b) => b.rating.submittedAt - a.rating.submittedAt)
+      .slice(0, 5)
+      .map(app => ({
+        rating: app.rating.score,
+        feedback: app.rating.feedback,
+        date: app.rating.submittedAt
+      }));
+
+    return res.json({
+      success: true,
+      data: {
+        totalRatings,
+        averageRating,
+        ratingDistribution,
+        recentFeedback
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching doctor ratings:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while fetching ratings"
+    });
+  }
+};
+
 module.exports = {
   bookAppointment,
   getDoctorAppointments,
@@ -490,5 +735,7 @@ module.exports = {
   acceptAppointment,
   completeAppointment,
   getPatientAppointments,
-  
+  submitAppointmentRating,
+  patientCancelAppointment,
+  getDoctorRatings
 };

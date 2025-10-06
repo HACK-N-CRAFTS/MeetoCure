@@ -135,17 +135,27 @@ const PatientDetails = () => {
       });
       if (meta.length) data.append("medicalRecordsMeta", JSON.stringify(meta));
 
-      await axios.post(`${API_BASE_URL}/api/appointments/book`, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      toast.dismiss(loadingToast);
-      toast.success("Appointment booked in progress!");
-      // for testing flow (payment later)
-      window.location.href = "https://rzp.io/rzp/8l24wgPo";
-      setLoading(false);
+      try {
+        await axios.post(`${API_BASE_URL}/api/appointments/book`, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        toast.dismiss(loadingToast);
+        toast.success("Appointment booked successfully!");
+        // for testing flow (payment later)
+        window.location.href = "https://rzp.io/rzp/8l24wgPo";
+      } catch (apiError) {
+        if (apiError.response?.status === 409) {
+          toast.error("This time slot is already booked. Please select a different time.");
+          navigate("/patient/appointments/datetime");
+        } else {
+          throw apiError; // Let the outer catch handle other errors
+        }
+      } finally {
+        setLoading(false);
+      }
     } catch (error) {
       setLoading(false);
       toast.dismiss(loadingToast);

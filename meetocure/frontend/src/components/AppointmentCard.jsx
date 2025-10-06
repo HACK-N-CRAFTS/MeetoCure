@@ -198,16 +198,25 @@ const AppointmentCard = ({ appt, onStatusUpdate }) => {
       {/* Status */}
       {appt.status && appt.status !== "pending" && (
         <div className="mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-600 font-medium">Status:</span>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
-              appt.status === "completed" ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200" : 
-              appt.status === "cancelled" ? "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200" : 
-              appt.status === "accepted" ? "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200" :
-              "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200"
-            }`}>
-              {appt.status}
-            </span>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-600 font-medium">Status:</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                appt.status === "completed" ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200" : 
+                appt.status === "cancelled" || appt.status === "patient-cancelled" ? "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200" : 
+                appt.status === "accepted" ? "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200" :
+                "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200"
+              }`}>
+                {appt.status === "patient-cancelled" ? "Cancelled by Patient" : appt.status}
+              </span>
+            </div>
+            {appt.status === "patient-cancelled" && appt.cancellationReason && (
+              <div className="bg-red-50 border border-red-100 rounded-lg p-3">
+                <p className="text-xs text-red-800">
+                  <span className="font-semibold">Cancellation Reason:</span> {appt.cancellationReason}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -216,7 +225,7 @@ const AppointmentCard = ({ appt, onStatusUpdate }) => {
       <div className="space-y-2">
         {/* Primary Action Buttons Row */}
         <div className="flex gap-2">
-          {appt.status === "pending" && (
+          {(appt.status === "pending" || appt.status === "confirmed") && (
             <button
               onClick={handleAccept}
               className="flex-1 bg-gradient-to-r from-green-100 to-emerald-100 hover:from-green-200 hover:to-emerald-200 text-green-700 text-xs py-2 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md"
@@ -224,7 +233,7 @@ const AppointmentCard = ({ appt, onStatusUpdate }) => {
               Accept
             </button>
           )}
-          {appt.status === "accepted" && (
+          {(appt.status === "accepted" || appt.status === "confirmed") && !["cancelled", "completed", "patient-cancelled"].includes(appt.status?.toLowerCase()) && (
             <button
               onClick={handleComplete}
               className="flex-1 bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 text-blue-700 text-xs py-2 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md"
@@ -244,7 +253,7 @@ const AppointmentCard = ({ appt, onStatusUpdate }) => {
         
         {/* Cancel Button Row */}
         <div className="flex gap-2">
-          {appt.status !== "cancelled" && appt.status !== "completed" && (
+          {!["cancelled", "completed", "patient-cancelled"].includes(appt.status?.toLowerCase()) && (
             <button
               onClick={handleCancel}
               className="flex-1 bg-gradient-to-r from-red-100 to-rose-100 hover:from-red-200 hover:to-rose-200 text-red-700 text-xs py-2 rounded-lg font-semibold transition-all duration-300 shadow-sm hover:shadow-md"

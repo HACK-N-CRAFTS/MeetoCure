@@ -7,11 +7,41 @@ import TopIcons from "../../components/TopIcons";
 import axios from "axios";
 import { API_BASE_URL } from "../../lib/config";
 
+const TABS = {
+  UPCOMING: "Upcoming",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  PATIENT_CANCELLED: "Patient Cancelled"
+};
+
 const DoctorAppointmentsPage = () => {
-  const [selectedTab, setSelectedTab] = useState("Upcoming");
+  const [selectedTab, setSelectedTab] = useState(TABS.UPCOMING);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Calculate counts for tabs
+  const appointmentCounts = React.useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return appointments.reduce((acc, appt) => {
+      const status = (appt.status || "").toLowerCase();
+      const appointmentDate = new Date(appt.date).toISOString().split('T')[0];
+      
+      if ((status === "pending" || status === "accepted" || status === "confirmed") && appointmentDate >= today) {
+        acc.upcoming = (acc.upcoming || 0) + 1;
+      }
+      if (status === "completed") {
+        acc.completed = (acc.completed || 0) + 1;
+      }
+      if (status === "cancelled") {
+        acc.cancelled = (acc.cancelled || 0) + 1;
+      }
+      if (status === "patient-cancelled") {
+        acc.patientCancelled = (acc.patientCancelled || 0) + 1;
+      }
+      return acc;
+    }, {});
+  }, [appointments]);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -42,7 +72,19 @@ const DoctorAppointmentsPage = () => {
           gender: appt.patientInfo?.gender || "N/A",
           phone: appt.patientInfo?.phone || appt.patient?.phone || "N/A",
           note: appt.patientInfo?.note || "",
-          reason: appt.reason || "Not specified"
+          reason: appt.reason || "Not specified",
+          cancellationReason: appt.cancellationReason || "",
+          statusDetails: (() => {
+            const status = (appt.status || "").toLowerCase();
+            if (status === "patient-cancelled") {
+              return {
+                label: "Patient Cancelled",
+                color: "text-red-600 bg-red-50",
+                message: appt.cancellationReason ? `Reason: ${appt.cancellationReason}` : "No reason provided"
+              };
+            }
+            return null;
+          })()
         }));
 
 
@@ -66,14 +108,27 @@ const DoctorAppointmentsPage = () => {
   const filteredAppointments = appointments.filter((appt) => {
     const today = new Date().toISOString().split('T')[0];
     const appointmentDate = new Date(appt.date).toISOString().split('T')[0];
+    const status = (appt.status || "").toLowerCase();
     
     switch (selectedTab) {
       case "Upcoming":
-        return (appt.status === "pending" || appt.status === "accepted") && appointmentDate >= today;
+        return (status === "pending" || status === "accepted" || status === "confirmed") && appointmentDate >= today;
       case "Completed":
-        return appt.status === "completed";
-      case "Cancelled":
-        return appt.status === "cancelled";
+        return status === "completed";
+      case "Cancelled": {
+        // Only show doctor cancellations in this tab
+        return status === "cancelled";
+      }
+      case "Patient Cancelled": {
+        // Show only patient cancellations with reason if available
+        if (status === "patient-cancelled") {
+          appt.displayReason = appt.cancellationReason ? 
+            `Reason: ${appt.cancellationReason}` : 
+            'No reason provided';
+          return true;
+        }
+        return false;
+      }
       default:
         return true;
     }
@@ -115,7 +170,21 @@ const DoctorAppointmentsPage = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Tabs */}
         <div className="mb-8">
-          <AppointmentTabs active={selectedTab} onChange={setSelectedTab} />
+          <AppointmentTabs 
+            active={selectedTab} 
+            onChange={(tab) => {
+              setSelectedTab(tab);
+              // Reset any filters or sorting when changing tabs
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            counts={appointmentCounts}
+          />
+          <div className="mt-4 text-sm text-gray-500">
+            {selectedTab === TABS.UPCOMING && `Showing ${appointmentCounts.upcoming || 0} upcoming appointments`}
+            {selectedTab === TABS.COMPLETED && `Showing ${appointmentCounts.completed || 0} completed appointments`}
+            {selectedTab === TABS.CANCELLED && `Showing ${appointmentCounts.cancelled || 0} cancelled appointments by you`}
+            {selectedTab === TABS.PATIENT_CANCELLED && `Showing ${appointmentCounts.patientCancelled || 0} appointments cancelled by patients`}
+          </div>
         </div>
 
         {/* Appointment Cards */}

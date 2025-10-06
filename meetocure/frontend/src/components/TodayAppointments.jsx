@@ -9,6 +9,10 @@ const UpcomingAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleSeeAll = () => {
+    navigate('/doctor/appointments');
+  };
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -278,9 +282,16 @@ const UpcomingAppointments = () => {
     return appointmentDate.toLocaleDateString();
   };
 
+  // Filter and sort appointments
+  const sortedAppointments = appointments
+    .filter(appt => isToday(appt.date) || isUpcoming(appt.date))
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 5);
+
   return (
-    <div className="grid md:grid-cols-2 gap-6">
-      {appointments.map((appt) => (
+    <div className="space-y-6">
+      <div className="grid md:grid-cols-2 gap-6">
+        {sortedAppointments.map((appt) => (
         <div
           key={appt._id}
           className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group"
@@ -407,6 +418,17 @@ const UpcomingAppointments = () => {
           </div>
         </div>
       ))}
+      </div>
+      {appointments.length > 5 && (
+        <div className="flex justify-center">
+          <button
+            onClick={handleSeeAll}
+            className="bg-gradient-to-r from-[#0A4D68] to-[#1e6b8a] hover:from-[#083e54] hover:to-[#0A4D68] text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-sm"
+          >
+            See All Appointments
+          </button>
+        </div>
+      )}
     </div>
   );
 };
