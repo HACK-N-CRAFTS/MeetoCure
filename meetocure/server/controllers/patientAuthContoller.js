@@ -41,7 +41,7 @@ exports.sendOtp = async (req, res) => {
         phone, 
         otp: otpCode, 
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000) // 5 minutes
       },
       { upsert: true, new: true }
     );
@@ -51,7 +51,7 @@ exports.sendOtp = async (req, res) => {
     console.log("📱 PATIENT - DEVELOPMENT MODE OTP");
     console.log("Phone:", phone);
     console.log("OTP Code:", otpCode);
-    console.log("Expires:", new Date(Date.now() + 5 * 60 * 1000).toLocaleString());
+    console.log("Expires:", new Date(Date.now() + 2 * 60 * 1000).toLocaleString());
     console.log("═══════════════════════════════════");
 
     res.json({ 
