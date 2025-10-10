@@ -82,20 +82,59 @@ const App = () => {
                 if (!token) {
                     throw new Error("Authentication token not found");
                 }
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/hospitals/hospitallogins`, {
+
+                // Fetch hospitals
+                const hospitalsResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/hospitals/hospitallogins`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+
+                if (!hospitalsResponse.ok) {
+                    throw new Error(`HTTP error! status: ${hospitalsResponse.status}`);
                 }
-                
-                const data = await response.json();
+
+                const hospitalsData = await hospitalsResponse.json();
+
+                // Fetch reviews for each hospital
+                const hospitalPromises = hospitalsData.map(async (hospital) => {
+                    try {
+                        const reviewsResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/hospitalReviews/${hospital._id}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        });
+
+                        if (reviewsResponse.ok) {
+                            const reviewsData = await reviewsResponse.json();
+                            console.log('Reviews data for hospital:', hospital._id, reviewsData);
+                            
+                            // Extract reviews from the correct path in the response
+                            const reviews = reviewsData.data || [];
+                            const totalReviews = reviewsData.pagination?.totalReviews || reviews.length || 0;
+                            
+                            // Calculate average rating
+                            const totalRating = reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
+                            const averageRating = totalReviews > 0 ? totalRating / totalReviews : 0;
+
+                            return {
+                                ...hospital,
+                                reviews,
+                                averageRating,
+                                reviewCount: totalReviews
+                            };
+                        }
+                        return hospital;
+                    } catch (error) {
+                        console.error(`Error fetching reviews for hospital ${hospital._id}:`, error);
+                        return hospital;
+                    }
+                });
+
+                const hospitalsWithReviews = await Promise.all(hospitalPromises);
             
                 // Normalize items so filters operate on consistent fields
-                const normalized = Array.isArray(data) ? data.map(h => ({
+                const normalized = hospitalsWithReviews.map(h => ({
                     id: h.id || h._id || h.hospitalId || null,
                     _id: h._id || h.id || null,
                     hospitalName: h.hospitalName || h.name || h.title || '',
@@ -109,11 +148,12 @@ const App = () => {
                     doctors: Array.isArray(h.doctors) ? h.doctors : (Array.isArray(h.doctorList) ? h.doctorList : []),
                     isFavorite: !!h.isFavorite,
                     hospitalImage: h.hospitalImage || h.image || h.photo || h.coverImage || '/assets/hospital-default.jpg',
-                    rating: h.rating || 0,
-                    reviewCount: h.totalReviews || 0,
+                    rating: h.averageRating || h.rating || 0,
+                    reviewCount: h.reviewCount || h.totalReviews || 0,
+                    reviews: h.reviews || [],
                     distance: h.distance || 0,
                     raw: h
-                })) : [];
+                }));
 
                 setHospitals(normalized);
             } catch (error) {
@@ -200,9 +240,24 @@ const sortedAndFilteredHospitals = useMemo(() => {
     // Doctor availability filter
     if (doctorFilter !== 'All') {
         processedHospitals = processedHospitals.filter(h => {
-            const doctorCount = Array.isArray(h.doctors) ? h.doctors.length : 0;
-            if (doctorFilter === 'Available Doctors') return doctorCount > 0;
-            if (doctorFilter === 'No Doctors') return doctorCount === 0;
+            // Safely check if doctors array exists and is valid
+            const doctors = Array.isArray(h.doctors) ? h.doctors : [];
+            
+            // Count only active and available doctors
+            const availableDoctors = doctors.filter(doctor => 
+                doctor && 
+                doctor.isActive !== false && // Consider doctor as active unless explicitly set to false
+                doctor.availability && // Check if availability data exists
+                doctor.availability.some(slot => 
+                    slot && slot.isAvailable && 
+                    new Date(slot.date) >= new Date() // Only future slots
+                )
+            );
+            
+            const availableDoctorCount = availableDoctors.length;
+            
+            if (doctorFilter === 'Available Doctors') return availableDoctorCount > 0;
+            if (doctorFilter === 'No Doctors') return availableDoctorCount === 0;
             return true;
         });
     }
@@ -305,25 +360,6 @@ const sortedAndFilteredHospitals = useMemo(() => {
             </div>
 
             <div className="px-4 py-6 md:px-12 md:py-8">
-                {/* Summary Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
-                    <div className="bg-white rounded-xl p-4 md:p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="text-2xl md:text-3xl font-bold text-[#0c4d6b] mb-2">{hospitals.length}</div>
-                        <div className="text-sm md:text-base text-gray-600 font-medium">Total Hospitals</div>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 md:p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="text-2xl md:text-3xl font-bold text-green-600 mb-2">
-                            {hospitals.reduce((total, h) => total + (h.doctors ? h.doctors.length : 0), 0)}
-                        </div>
-                        <div className="text-sm md:text-base text-gray-600 font-medium">Total Doctors</div>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 md:p-6 text-center shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                        <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
-                            {hospitals.filter(h => h.doctors && h.doctors.length > 0).length}
-                        </div>
-                        <div className="text-sm md:text-base text-gray-600 font-medium">Available Now</div>
-                    </div>
-                </div>
 
                 {/* Search and Filters */}
                 <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 mb-6 md:mb-8">

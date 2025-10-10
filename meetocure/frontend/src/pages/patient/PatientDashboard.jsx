@@ -263,7 +263,18 @@ const PatientDashboard = () => {
 
               {/* Providers Section */}
               <div className="space-y-12">
-                <DoctorCardList title="Nearby Doctors" doctors={doctors} type="doctor" />
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold text-[#0F172A] tracking-tight">Nearby Doctors</h2>
+                    <button
+                      onClick={() => navigate('/alldoctors')}
+                      className="flex items-center gap-2 text-[#0369A1] hover:text-[#075985] transition-colors font-medium bg-white/60 px-4 py-2 rounded-lg hover:bg-white/80"
+                    >
+                      View All Doctors
+                    </button>
+                  </div>
+                  <DoctorCardList doctors={doctors} type="doctor" />
+                </div>
                 <HospitalCardList title="Nearby Hospitals" />
               </div>
             </>
@@ -318,13 +329,6 @@ const PatientDashboard = () => {
     </div>
   );
 };
-const SectionHeader = ({ title }) => (
-  <div className="mb-6">
-    <h2 className="text-2xl font-semibold text-[#1F2A37]">{title}</h2>
-  </div>
-
-);
-
 
 const categories = [
   { label: "Dentistry", icon: "dentist.png" },

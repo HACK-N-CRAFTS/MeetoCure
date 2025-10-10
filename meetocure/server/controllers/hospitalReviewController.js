@@ -1,4 +1,4 @@
-const Hospital = require('../models/Hospital');
+const HospitalLogin = require('../models/HospitalLogin');
 const HospitalReview = require('../models/HospitalReview');
 const mongoose = require('mongoose');
 
@@ -9,32 +9,49 @@ const createReview = async (req, res) => {
 
     try {
         const { hospitalId, rating, review, images } = req.body;
+        
+        if (!hospitalId) {
+            throw new Error('Hospital ID is required');
+        }
+
         const patientId = req.user.id; // Assuming this comes from auth middleware
 
-        // Create the review
-        const newReview = await HospitalReview.create([{
+        // Check if patient has already reviewed this hospital
+        const existingReview = await HospitalReview.findOne({
             hospital: hospitalId,
-            patient: patientId,
-            rating,
-            review,
-            images: images || []
-        }], { session });
+            patient: patientId
+        });
 
-        // Update hospital's reviews and rating
-        const hospital = await Hospital.findById(hospitalId);
-        if (!hospital) {
+        if (existingReview) {
+            throw new Error('You have already reviewed this hospital. You can update your existing review instead.');
+        }
+
+        // Verify the hospital exists
+        const hospitalExists = await HospitalLogin.findById(hospitalId);
+        if (!hospitalExists) {
             throw new Error('Hospital not found');
         }
 
-        hospital.reviews.push(newReview[0]._id);
-        hospital.totalReviews += 1;
+        // Create the review
+        const newReview = await HospitalReview.create([{
+            hospital: hospitalId, // This maps to the hospital field in the schema
+            patient: patientId,
+            rating,
+            review,
+            images: images || [],
+            status: 'approved' // Since we're using HospitalLogin, we can approve by default
+        }], { session });
+
+        // Update hospital's reviews and rating
+        hospitalExists.reviews.push(newReview[0]._id);
+        hospitalExists.totalReviews += 1;
         
         // Calculate new average rating
         const allReviews = await HospitalReview.find({ hospital: hospitalId });
         const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
-        hospital.rating = totalRating / hospital.totalReviews;
+        hospitalExists.rating = totalRating / hospitalExists.totalReviews;
 
-        await hospital.save({ session });
+        await hospitalExists.save({ session });
         await session.commitTransaction();
 
         res.status(201).json({
@@ -61,11 +78,11 @@ const getHospitalReviews = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const reviews = await HospitalReview.find({ hospital: hospitalId })
-            .populate('patient', 'name profileImage')
+            .populate('patient').populate('hospital')
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit);
-
+            .limit(limit); 
+        // console.log(reviews)        
         const total = await HospitalReview.countDocuments({ hospital: hospitalId });
 
         res.json({
@@ -89,11 +106,24 @@ const getHospitalReviews = async (req, res) => {
 const updateReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
-        const { rating, review, images } = req.body;
+        
+        // Create an update object with only the provided fields
+        const updateFields = {};
+        if (req.body.rating !== undefined) updateFields.rating = req.body.rating;
+        if (req.body.review !== undefined) updateFields.review = req.body.review;
+        if (req.body.images !== undefined) updateFields.images = req.body.images;
+
+        // Only perform update if there are fields to update
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'No fields to update provided'
+            });
+        }
         
         const updatedReview = await HospitalReview.findOneAndUpdate(
             { _id: reviewId, patient: req.user.id },
-            { rating, review, images },
+            { $set: updateFields },
             { new: true }
         );
 
@@ -104,12 +134,16 @@ const updateReview = async (req, res) => {
             });
         }
 
-        // Recalculate hospital rating
-        const hospital = await Hospital.findById(updatedReview.hospital);
-        const allReviews = await HospitalReview.find({ hospital: updatedReview.hospital });
-        const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
-        hospital.rating = totalRating / hospital.totalReviews;
-        await hospital.save();
+        // Only recalculate hospital rating if rating was updated
+        if (updateFields.rating !== undefined) {
+            const hospital = await HospitalLogin.findById(updatedReview.hospital);
+            if (hospital) {
+                const allReviews = await HospitalReview.find({ hospital: updatedReview.hospital });
+                const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+                hospital.rating = totalRating / hospital.totalReviews;
+                await hospital.save();
+            }
+        }
 
         res.json({
             success: true,
@@ -141,19 +175,21 @@ const deleteReview = async (req, res) => {
         }
 
         // Update hospital's reviews and rating
-        const hospital = await Hospital.findById(review.hospital);
-        hospital.reviews = hospital.reviews.filter(r => r.toString() !== reviewId);
-        hospital.totalReviews -= 1;
+        const hospital = await HospitalLogin.findById(review.hospital);
+        if (hospital) {
+            hospital.reviews = hospital.reviews.filter(r => r.toString() !== reviewId);
+            hospital.totalReviews -= 1;
 
-        if (hospital.totalReviews > 0) {
-            const allReviews = await HospitalReview.find({ hospital: review.hospital });
-            const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
-            hospital.rating = totalRating / hospital.totalReviews;
-        } else {
-            hospital.rating = 0;
+            if (hospital.totalReviews > 0) {
+                const allReviews = await HospitalReview.find({ hospital: review.hospital });
+                const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+                hospital.rating = totalRating / hospital.totalReviews;
+            } else {
+                hospital.rating = 0;
+            }
+
+            await hospital.save({ session });
         }
-
-        await hospital.save({ session });
         await session.commitTransaction();
 
         res.json({

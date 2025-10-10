@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaPhoneAlt, FaMapMarkedAlt } from "react-icons/fa";
 import DoctorCardList from "../DoctorCard";
+import HospitalReviews from "./review"; // Import the new component
 
 const HospitalDetails = () => {
   const { id } = useParams();
@@ -39,12 +40,11 @@ const HospitalDetails = () => {
     fetchHospital();
   }, [id]);
 
-  
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         setLoadingDoctors(true);
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`,{
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/doctor`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
           },
@@ -95,7 +95,6 @@ const HospitalDetails = () => {
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(hospital.address)}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hospital.hospitalName)}`;
 
-  // pick image field with sensible fallbacks
   const imageUrl = hospital?.hospitalImage || hospital?.photo || hospital?.coverImage || hospital?.logo || "/assets/image.png";
 
   return (
@@ -233,6 +232,9 @@ const HospitalDetails = () => {
             </div>
           </aside>
         </div>
+
+        <HospitalReviews hospitalId={id} />
+        {/* Reviews Section - Now a separate component */}
       </div>
     </div>
   );

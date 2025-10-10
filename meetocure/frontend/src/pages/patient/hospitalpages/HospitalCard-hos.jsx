@@ -2,25 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaHeart, FaRegHeart, FaStar, FaMapMarkerAlt, FaUserMd, FaClock, FaPhone } from 'react-icons/fa';
 
-const StarRating = ({ rating }) => {
+const StarRating = ({ rating, reviewCount = 0 }) => {
     const totalStars = 5;
     const numRating = Number(rating) || 0;
+    const fullStars = Math.floor(numRating);
+    const hasHalfStar = numRating - fullStars >= 0.5;
     
     return (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
             <div className="flex">
                 {Array.from({ length: totalStars }, (_, index) => (
                     <FaStar 
                         key={index} 
                         className={`w-3 h-3 ${
-                            index < Math.floor(numRating) ? 'text-yellow-400' : 'text-gray-300'
+                            index < fullStars 
+                                ? 'text-yellow-400' 
+                                : index === fullStars && hasHalfStar
+                                ? 'text-yellow-400 opacity-50'
+                                : 'text-gray-300'
                         }`} 
                     />
                 ))}
             </div>
-            <span className="text-sm text-gray-600 ml-1">
-                {numRating.toFixed(1)}
-            </span>
+            <div className="flex items-center gap-1">
+                <span className="text-sm font-medium text-gray-700">
+                    {numRating.toFixed(1)}
+                </span>
+                <span className="text-xs text-gray-500">
+                    ({reviewCount})
+                </span>
+            </div>
         </div>
     );
 };
@@ -52,9 +63,9 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
         setImageLoading(false);
     };
 
-    // Use actual rating and review count data
-    const rating = hospital.rating || 0;
-    const reviewCount = hospital.totalReviews || 0;
+    // Use rating and review count from the normalized data
+    const rating = hospital.averageRating || hospital.rating || 0;
+    const reviewCount = hospital.reviewCount || hospital.totalReviews || 0;
 
     return (
         // make card full-height flex column with a minimum height so all cards match
@@ -152,8 +163,18 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
 
                         {/* Rating */}
                         <div className="flex items-center justify-between">
-                            <StarRating rating={rating} />
-                            <span className="text-xs text-gray-500">({reviewCount} reviews)</span>
+                            <StarRating rating={rating} reviewCount={reviewCount} />
+                            {hospital.reviews && hospital.reviews.length > 0 && (
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onClick) onClick();
+                                    }}
+                                    className="text-xs text-blue-600 hover:text-blue-700 hover:underline"
+                                >
+                                    View Reviews
+                                </button>
+                            )}
                         </div>
 
                         {/* Services/Specialties (reserve single line height) */}

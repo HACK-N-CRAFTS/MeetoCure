@@ -66,6 +66,7 @@ import ProfileView from "./pages/doctor/profile/profileView";
 import AppointmentProvider from "./contexts/AppointmentContext.jsx";
 import DcoterVerificationPending from "./pages/doctor/DcoterVerificationPending.jsx";
 import ScrollToTop from "./components/ScrollTop.jsx";
+import Alldoctors from "./pages/patient/doctorspages/Alldoctors.jsx";
 
 function App() {
     // const navigate=useNavigate();cd
@@ -151,6 +152,7 @@ function App() {
         <Route path="/details/:type/:id" element={<DetailsPage />} />
         <Route path="/hospital/:hospitalId/doctors" element={<HospitalDoctorsPage />} />
         <Route path="/patient/appointments/Query" element={<PatientPublicForm />} />
+        <Route path="/alldoctors" element={<Alldoctors />} />
         {/* </Route> */}
         {/* Notifications Route */}
 
