@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCalendarAlt } from "react-icons/fa";
+import { Calendar } from "lucide-react";
 import AppointmentTabs from "../../components/AppointmentTabs";
 import AppointmentCard from "../../components/AppointmentCard";
 import TopIcons from "../../components/TopIcons";
+import EnterpriseCard from "../../components/EnterpriseCard";
 import axios from "axios";
 import { API_BASE_URL } from "../../lib/config";
 
@@ -143,62 +145,80 @@ const DoctorAppointmentsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#E8F4F8] font-['Inter',sans-serif]">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/20 font-['Poppins']">
+      {/* Enhanced Header */}
       <div className="px-4 md:px-8 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/doctor-dashboard")}
-              className="p-2.5 rounded-xl bg-white border-2 border-[#E8F4F8] hover:border-[#0A4D68] transition-all duration-200"
+              className="group p-3 rounded-xl bg-white border-2 border-slate-200 hover:border-[#004B5C] hover:shadow-lg transition-all duration-200"
             >
-              <FaArrowLeft className="text-[#0A4D68]" />
+              <FaArrowLeft className="text-slate-600 group-hover:text-[#004B5C] transition-colors" />
             </button>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[#0A4D68] tracking-tight">Appointments</h1>
-              <p className="text-sm text-[#666666]">Manage your patient appointments</p>
+              <div className="flex items-center gap-3 mb-1">
+                <div className="p-2 bg-gradient-to-br from-[#004B5C] to-[#006B7D] rounded-lg">
+                  <Calendar className="text-white w-5 h-5" />
+                </div>
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#004B5C] to-[#006B7D] bg-clip-text text-transparent">
+                  Appointments
+                </h1>
+              </div>
+              <p className="text-sm text-slate-600 font-medium">Manage and track your patient consultations</p>
             </div>
           </div>
           <TopIcons />
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6 bg-white rounded-2xl border-2 border-[#E8F4F8] p-1">
-          <AppointmentTabs
-            active={selectedTab}
-            onChange={(tab) => {
-              setSelectedTab(tab);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            counts={appointmentCounts}
-          />
-        </div>
+        {/* Enhanced Tabs */}
+        <EnterpriseCard className="mb-8 overflow-hidden">
+          <div className="p-1.5">
+            <AppointmentTabs
+              active={selectedTab}
+              onChange={(tab) => {
+                setSelectedTab(tab);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              counts={appointmentCounts}
+            />
+          </div>
+        </EnterpriseCard>
 
-        {/* Appointment Cards */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Appointment Cards with Enhanced Design */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {loading ? (
-            <div className="col-span-full flex items-center justify-center py-16">
+            <div className="col-span-full flex items-center justify-center py-20">
               <div className="text-center">
-                <div className="w-12 h-12 border-3 border-[#E8F4F8] border-t-[#0A4D68] rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-[#666666] text-sm font-medium">Loading appointments...</p>
+                <div className="relative mb-6">
+                  <div className="w-16 h-16 border-4 border-slate-200 border-t-[#004B5C] rounded-full animate-spin mx-auto"></div>
+                  <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-[#006B7D] rounded-full animate-spin mx-auto" style={{ animationDuration: '1.5s' }}></div>
+                </div>
+                <p className="text-slate-600 text-base font-semibold">Loading appointments...</p>
+                <p className="text-slate-400 text-sm mt-1">Please wait while we fetch your data</p>
               </div>
             </div>
           ) : filteredAppointments.length === 0 ? (
             <div className="col-span-full">
-              <div className="bg-white rounded-2xl border-2 border-[#E8F4F8] p-12 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-[#E8F4F8] rounded-2xl flex items-center justify-center">
-                  <FaCalendarAlt className="text-3xl text-[#0A4D68]" />
+              <EnterpriseCard className="overflow-hidden">
+                <div className="p-16 text-center">
+                  <div className="relative inline-block mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#004B5C] to-[#006B7D] rounded-3xl blur-2xl opacity-20"></div>
+                    <div className="relative w-24 h-24 mx-auto bg-gradient-to-br from-slate-100 to-blue-50 rounded-3xl flex items-center justify-center shadow-lg">
+                      <FaCalendarAlt className="text-4xl text-[#004B5C]" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-800 mb-3">
+                    No {selectedTab.toLowerCase()} appointments
+                  </h3>
+                  <p className="text-base text-slate-500 font-medium max-w-md mx-auto">
+                    {selectedTab === "Upcoming"
+                      ? "You don't have any upcoming appointments scheduled. New appointments will appear here."
+                      : `You don't have any ${selectedTab.toLowerCase()} appointments at the moment.`
+                    }
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-[#0A4D68] mb-2">
-                  No {selectedTab.toLowerCase()} appointments
-                </h3>
-                <p className="text-sm text-[#888888] font-medium">
-                  {selectedTab === "Upcoming"
-                    ? "You don't have any upcoming appointments scheduled."
-                    : `You don't have any ${selectedTab.toLowerCase()} appointments.`
-                  }
-                </p>
-              </div>
+              </EnterpriseCard>
             </div>
           ) : (
             filteredAppointments.map((appt) => (

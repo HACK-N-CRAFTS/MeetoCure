@@ -241,7 +241,7 @@ const PatientDashboard = () => {
                     <div
                       key={item.label}
                       onClick={() => handleCategoryClick(item.label)}
-                      className="group relative bg-white hover:bg-gradient-to-br hover:from-[#0369A1] hover:to-[#0284C7] rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
+                      className="group relative bg-white hover:bg-gradient-to-br rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-[#EFF6FF] to-white opacity-0 group-hover:opacity-0 transition-opacity" />
                       <div className="relative p-8 flex flex-col items-center justify-center min-h-[200px]">
@@ -249,10 +249,10 @@ const PatientDashboard = () => {
                           <img
                             src={`/assets/categories/${item.icon}`}
                             alt={item.label}
-                            className="w-12 h-12 group-hover:filter group-hover:brightness-0 group-hover:invert transition-all"
+                            className="w-12 h-12 t transition-all"
                           />
                         </div>
-                        <p className="text-base font-semibold text-[#0F172A] group-hover:text-white text-center transition-colors">
+                        <p className="text-base font-semibold text-[#0F172A]  text-center transition-colors">
                           {item.label}
                         </p>
                       </div>

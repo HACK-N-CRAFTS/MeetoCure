@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Search Results - Fever | AP Health</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="results-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="lang-telugu">
+    <!-- Search Results Screen -->
+    <div class="mobile-frame" id="resultsScreen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span class="time">9:41</span>
+            <div class="status-icons">
+                <span>📶</span>
+                <span>📡</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- Top App Bar -->
+        <header class="app-bar">
+            <button class="back-button" onclick="window.history.back()">
+                <span class="icon">←</span>
+                <span class="back-text">Back</span>
+            </button>
+            <h1 class="page-title">Search Results</h1>
+            <button class="filter-button" id="filterButton">
+                <span class="icon">⚙️</span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content results-content">
+            <!-- Search Summary -->
+            <div class="search-summary">
+                <p class="result-count">
+                    <span class="count-en">Showing 12 doctors for "Fever"</span>
+                    <span class="count-te">"జ్వరం" కోసం 12 వైద్యులు</span>
+                </p>
+            </div>
+
+            <!-- Active Filters -->
+            <div class="filter-chips-container">
+                <button class="filter-chip active" data-filter="all">
+                    <span>All</span>
+                </button>
+                <button class="filter-chip active" data-filter="telugu">
+                    <span>Telugu ✓</span>
+                </button>
+                <button class="filter-chip active" data-filter="distance">
+                    <span>&lt;5km ✓</span>
+                </button>
+                <button class="filter-chip" data-filter="aarogyasri">
+                    <span>Aarogyasri</span>
+                </button>
+                <button class="filter-chip clear-filters" id="clearFilters">
+                    <span>✕ Clear</span>
+                </button>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="sort-container">
+                <label for="sortSelect">Sort:</label>
+                <select id="sortSelect" class="sort-select">
+                    <option value="relevance">Relevance</option>
+                    <option value="distance">Distance</option>
+                    <option value="rating">Rating</option>
+                    <option value="fees">Fees (Low to High)</option>
+                </select>
+                <button class="view-toggle" id="viewToggle">
+                    <span class="icon">📍</span>
+                </button>
+            </div>
+
+            <!-- Doctor Cards List -->
+            <div class="doctor-list" id="doctorList">
+                <!-- Doctor Card 1 -->
+                <article class="doctor-card">
+                    <div class="doctor-header">
+                        <div class="doctor-photo">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%234DA8DA' width='96' height='96'/%3E%3Ctext x='50%25' y='50%25' font-size='40' text-anchor='middle' dy='.3em' fill='white'%3E👨‍⚕️%3C/text%3E%3C/svg%3E" alt="Dr. Rama Mohan Rao">
+                        </div>
+                        <div class="doctor-info">
+                            <h2 class="doctor-name">
+                                <span class="name-te">డా. రామ మోహన్ రావు</span>
+                                <span class="name-en">Dr. Rama Mohan Rao</span>
+                                <span class="verified-badge">✓</span>
+                            </h2>
+                            <p class="doctor-specialty">
+                                <span class="specialty-en">General Physician</span>
+                                <span class="specialty-te">సాధారణ వైద్యం</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="doctor-details">
+                        <div class="detail-row">
+                            <span class="detail-icon">⭐</span>
+                            <span class="detail-text">4.5 (150)</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-icon">📍</span>
+                            <span class="detail-text">2.3 km</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-icon">💰</span>
+                            <span class="detail-text">₹500</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-icon">🗣️</span>
+                            <span class="detail-text">తెలుగు, ఆంగ్లం</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="hospital-name">Apollo Hospital, Visakhapatnam</span>
+                        </div>
+                    </div>
+
+                    <button class="view-profile-button" onclick="navigateToProfile('doctor-1')">
+                        <span class="button-text-en">View Profile</span>
+                        <span class="button-text-te">ప్రొఫైల్ చూడండి</span>
+                    </button>
+                </article>
+
+                <!-- Doctor Card 2 -->
+                <article class="doctor-card">
+                    <div class="doctor-header">
+                        <div class="doctor-photo">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%2360AD5E' width='96' height='96'/%3E%3Ctext x='50%25' y='50%25' font-size='40' text-anchor='middle' dy='.3em' fill='white'%3E👩‍⚕️%3C/text%3E%3C/svg%3E" alt="Dr. Lakshmi Devi">
+                        </div>
+                        <div class="doctor-info">
+                            <h2 class="doctor-name">
+                                <span class="name-te">డా. లక్ష్మి దేవి</span>
+                                <span class="name-en">Dr. Lakshmi Devi</span>
+                                <span class="verified-badge">✓</span>
+                            </h2>
+                            <p class="doctor-specialty">
+                                <span class="specialty-en">General Physician</span>
+                                <span class="specialty-te">సాధారణ వైద్యం</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="doctor-details">
+                        <div class="detail-row">
+                            <span class="detail-icon">⭐</span>
+                            <span class="detail-text">4.7 (89)</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-icon">📍</span>
+                            <span class="detail-text">3.8 km</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-icon">💰</span>
+                            <span class="detail-text">₹400</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-icon">🗣️</span>
+                            <span class="detail-text">తెలుగు</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="aarogyasri-badge">❤️ Aarogyasri</span>
+                            <span class="detail-separator">•</span>
+                            <span class="hospital-name">Govt Hospital, Guntur</span>
+                        </div>
+                    </div>
+
+                    <button class="view-profile-button" onclick="navigateToProfile('doctor-2')">
+                        <span class="button-text-en">View Profile</span>
+                        <span class="button-text-te">ప్రొఫైల్ చూడండి</span>
+                    </button>
+                </article>
+
+                <!-- Doctor Card 3 -->
+                <article class="doctor-card">
+                    <div class="doctor-header">
+                        <div class="doctor-photo">
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%23F57C00' width='96' height='96'/%3E%3Ctext x='50%25' y='50%25' font-size='40' text-anchor='middle' dy='.3em' fill='white'%3E👨‍⚕️%3C/text%3E%3C/svg%3E" alt="Dr. Venkata Rao">
+                        </div>
+                        <div class="doctor-info">
+                            <h2 class="doctor-name">
+                                <span class="name-te">డా. వెంకట రావు</span>
+                                <span class="name-en">Dr. Venkata Rao</span>
+                                <span class="verified-badge">✓</span>
+                            </h2>
+                            <p class="doctor-specialty">
+                                <span class="specialty-en">Pediatrician</span>
+                                <span class="specialty-te">శిశు వైద్యం</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="doctor-details">
+                        <div class="detail-row">
+                            <span class="detail-icon">⭐</span>
+                            <span class="detail-text">4.6 (203)</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-icon">📍</span>
+                            <span class="detail-text">4.2 km</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-icon">💰</span>
+                            <span class="detail-text">₹600</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-icon">🗣️</span>
+                            <span class="detail-text">తెలుగు, హిందీ</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="hospital-name">KIMS Hospital, Vijayawada</span>
+                        </div>
+                    </div>
+
+                    <button class="view-profile-button" onclick="navigateToProfile('doctor-3')">
+                        <span class="button-text-en">View Profile</span>
+                        <span class="button-text-te">ప్రొఫైల్ చూడండి</span>
+                    </button>
+                </article>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container">
+                <button class="load-more-button" id="loadMoreButton">
+                    <span class="button-text-en">Load More</span>
+                    <span class="button-text-te">మరిన్ని చూడండి</span>
+                </button>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">
+                    <span class="label-en">Search</span>
+                    <span class="label-te">వెతకండి</span>
+                </span>
+            </button>
+            <button class="nav-item">
+                <span class="nav-icon">📍</span>
+                <span class="nav-label">
+                    <span class="label-en">Near Me</span>
+                    <span class="label-te">సమీపంలో</span>
+                </span>
+            </button>
+            <button class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">
+                    <span class="label-en">Appts</span>
+                    <span class="label-te">అపాయింట్</span>
+                </span>
+            </button>
+            <button class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">
+                    <span class="label-en">Profile</span>
+                    <span class="label-te">ప్రొఫైల్</span>
+                </span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Filter Modal -->
+    <div class="modal-overlay" id="filterModal">
+        <div class="modal-content filter-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span class="title-en">Filters</span>
+                    <span class="title-te">ఫిల్టర్లు</span>
+                </h2>
+                <button class="modal-close" onclick="closeFilterModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Distance Filter -->
+                <div class="filter-section">
+                    <h3 class="filter-title">
+                        <span class="title-en">Distance</span>
+                        <span class="title-te">దూరం</span>
+                    </h3>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="50" value="5" class="distance-slider" id="distanceSlider">
+                        <span class="slider-value"><span id="distanceValue">5</span> km</span>
+                    </div>
+                </div>
+
+                <!-- Fees Filter -->
+                <div class="filter-section">
+                    <h3 class="filter-title">
+                        <span class="title-en">Consultation Fees</span>
+                        <span class="title-te">కన్సల్టేషన్ రుసుము</span>
+                    </h3>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="5000" step="100" value="1000" class="fees-slider" id="feesSlider">
+                        <span class="slider-value">₹<span id="feesValue">1000</span></span>
+                    </div>
+                </div>
+
+                <!-- Language Filter -->
+                <div class="filter-section">
+                    <h3 class="filter-title">
+                        <span class="title-en">Languages</span>
+                        <span class="title-te">భాషలు</span>
+                    </h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="telugu" checked>
+                            <span>Telugu / తెలుగు</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="english">
+                            <span>English / ఆంగ్లం</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="hindi">
+                            <span>Hindi / హిందీ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Hospital Type Filter -->
+                <div class="filter-section">
+                    <h3 class="filter-title">
+                        <span class="title-en">Hospital Type</span>
+                        <span class="title-te">ఆసుపత్రి రకం</span>
+                    </h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="government">
+                            <span>Government / ప్రభుత్వం</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="private">
+                            <span>Private / ప్రైవేట్</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="corporate">
+                            <span>Corporate / కార్పొరేట్</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Aarogyasri Filter -->
+                <div class="filter-section">
+                    <label class="checkbox-label checkbox-large">
+                        <input type="checkbox" value="aarogyasri">
+                        <span>❤️ Aarogyasri Accepted / ఆరోగ్యశ్రీ అంగీకరించబడింది</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary-button" onclick="clearAllFilters()">
+                    <span class="button-text-en">Clear All</span>
+                    <span class="button-text-te">అన్నీ తొలగించు</span>
+                </button>
+                <button class="primary-button" onclick="applyFilters()">
+                    <span class="button-text-en">Apply Filters</span>
+                    <span class="button-text-te">ఫిల్టర్లు వర్తింపజేయండి</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="results-script.js"></script>
+</body>
+</html>
