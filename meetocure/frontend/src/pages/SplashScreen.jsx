@@ -48,12 +48,12 @@ const SplashScreen = () => {
   }, []);
 
   useEffect(() => {
-    // if (currentIndex === splashFeatures.length - 1) {
-    //   const redirect = setTimeout(() => {
-    //     navigate("/choose-role");
-    //   }, 3000);
-    //   return () => clearTimeout(redirect);
-    // }
+    if (currentIndex === splashFeatures.length - 1) {
+      const redirect = setTimeout(() => {
+        navigate("/choose-role");
+      }, 3000);
+      return () => clearTimeout(redirect);
+    }
   }, [currentIndex, navigate]);
 
   const handleSkip = () => {
