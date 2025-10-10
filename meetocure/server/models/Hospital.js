@@ -52,18 +52,18 @@ const hospitalSchema = new mongoose.Schema(
             required: true,
         },
         departments: [String],
-        rating:
-        {
+        rating: {
             type: Number,
             default: 0,
         },
-
-        reviews:
-            [
-                {
-                    type: String,
-                },
-            ],
+        totalReviews: {
+            type: Number,
+            default: 0
+        },
+        reviews: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'HospitalReview'
+        }],
 
         doctors:
             [

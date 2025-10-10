@@ -45,6 +45,7 @@ app.use("/api/appointments", require("./routes/appointmentRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/slots", require("./routes/slotRoutes"));
 app.use("/api/hospitals", require("./routes/hospitalRoutes"));
+app.use("/api/hospital-reviews", require("./routes/hospitalReviewRoutes"));
 app.use("/api/availability", require("./routes/availabilityRoutes"));
 app.use("/api/chat", require("./routes/chatRoutes"));
 app.use("/api/search", require("./routes/searchRoutes"));

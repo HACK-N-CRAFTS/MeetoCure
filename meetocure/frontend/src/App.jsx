@@ -95,7 +95,7 @@ function App() {
   return (
     // <AuthProvider>
     // <GoogleMapsProvider>
-    <div>
+    <div className="font-poppins">
       <ScrollToTop />
       <Routes>
         {/* Common Routes */}

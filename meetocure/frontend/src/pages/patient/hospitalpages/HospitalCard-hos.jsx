@@ -52,9 +52,9 @@ const HospitalCard = React.memo(({ hospital, onClick, onToggleFavorite }) => {
         setImageLoading(false);
     };
 
-    // Generate a random rating if not provided
-    const rating = hospital.rating || (Math.random() * 2 + 3).toFixed(1);
-    const reviewCount = hospital.reviewCount || Math.floor(Math.random() * 500) + 50;
+    // Use actual rating and review count data
+    const rating = hospital.rating || 0;
+    const reviewCount = hospital.totalReviews || 0;
 
     return (
         // make card full-height flex column with a minimum height so all cards match

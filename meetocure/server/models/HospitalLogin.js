@@ -8,6 +8,9 @@ const hospitalLoginSchema = new mongoose.Schema({
     contact: { type: String, required: true },
     hospitalImage: { type: String },
     docters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }],
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'HospitalReview' }],
+    rating: { type: Number, default: 0 },
+    totalReviews: { type: Number, default: 0 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('HospitalLogin', hospitalLoginSchema);

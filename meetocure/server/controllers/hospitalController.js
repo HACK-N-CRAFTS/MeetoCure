@@ -29,8 +29,27 @@ const HospitalLogin = require("../models/HospitalLogin");
 // Get all hospitals from HospitalLogin collection
 const getAllHospitalLogins = async (req, res) => {
   try {
-    const hospitals = await HospitalLogin.find();
-    res.json(hospitals);
+    const hospitals = await HospitalLogin.find().populate({
+      path: 'reviews',
+      select: 'rating'
+    });
+
+    // Transform the data to include review stats
+    const hospitalsWithStats = hospitals.map(hospital => {
+      const reviews = hospital.reviews || [];
+      const totalReviews = reviews.length;
+      const avgRating = totalReviews > 0 
+        ? reviews.reduce((sum, review) => sum + (review.rating || 0), 0) / totalReviews 
+        : 0;
+
+      return {
+        ...hospital.toObject(),
+        rating: avgRating,
+        totalReviews: totalReviews
+      };
+    });
+
+    res.json(hospitalsWithStats);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

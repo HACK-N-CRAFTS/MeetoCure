@@ -109,8 +109,8 @@ const App = () => {
                     doctors: Array.isArray(h.doctors) ? h.doctors : (Array.isArray(h.doctorList) ? h.doctorList : []),
                     isFavorite: !!h.isFavorite,
                     hospitalImage: h.hospitalImage || h.image || h.photo || h.coverImage || '/assets/hospital-default.jpg',
-                    rating: h.rating || h.avgRating || null,
-                    reviewCount: h.reviewCount || h.reviews || 0,
+                    rating: h.rating || 0,
+                    reviewCount: h.totalReviews || 0,
                     distance: h.distance || 0,
                     raw: h
                 })) : [];
