@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Doctor Search - Home Screen | AP Health</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Home/Search Screen -->
+    <div class="mobile-frame" id="homeScreen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span class="time">9:41</span>
+            <div class="status-icons">
+                <span>📶</span>
+                <span>📡</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- Top App Bar -->
+        <header class="app-bar">
+            <button class="language-toggle" id="languageToggle">
+                <span class="icon">🌐</span>
+                <span class="lang-text" id="currentLang">తెలుగు</span>
+            </button>
+            <button class="profile-button">
+                <span class="icon">👤</span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- App Logo and Title -->
+            <div class="app-branding">
+                <div class="app-logo">
+                    <span class="logo-icon">🏥</span>
+                </div>
+                <h1 class="app-title">
+                    <span class="title-en">Doctor Appointment Booking</span>
+                    <span class="title-te">వైద్య అపాయింట్మెంట్ బుకింగ్</span>
+                </h1>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar" id="searchBar">
+                    <span class="search-icon">🔍</span>
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="searchInput"
+                        placeholder="Search symptoms..."
+                        aria-label="Search symptoms"
+                    >
+                    <span class="placeholder-text">
+                        <span class="placeholder-en">Search symptoms...</span>
+                        <span class="placeholder-te">లక్షణాలు వెతకండి...</span>
+                    </span>
+                    <button class="voice-button" id="voiceButton" aria-label="Voice search">
+                        <span class="icon">🎤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Common Symptoms Section -->
+            <section class="symptoms-section">
+                <h2 class="section-title">
+                    <span class="title-en">Common symptoms</span>
+                    <span class="title-te">సాధారణ లక్షణాలు</span>
+                </h2>
+
+                <div class="symptom-grid">
+                    <button class="symptom-chip" data-symptom="fever">
+                        <span class="chip-icon">😷</span>
+                        <span class="chip-label-en">Fever</span>
+                        <span class="chip-label-te">జ్వరం</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="headache">
+                        <span class="chip-icon">🤕</span>
+                        <span class="chip-label-en">Headache</span>
+                        <span class="chip-label-te">తలనొప్పి</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="cold">
+                        <span class="chip-icon">🤒</span>
+                        <span class="chip-label-en">Cold</span>
+                        <span class="chip-label-te">జలుబు</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="cough">
+                        <span class="chip-icon">🤢</span>
+                        <span class="chip-label-en">Cough</span>
+                        <span class="chip-label-te">దగ్గు</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="body-pain">
+                        <span class="chip-icon">😫</span>
+                        <span class="chip-label-en">Body Pain</span>
+                        <span class="chip-label-te">శరీర నొప్పి</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="joint-pain">
+                        <span class="chip-icon">🦴</span>
+                        <span class="chip-label-en">Joint Pain</span>
+                        <span class="chip-label-te">కీళ్ళ నొప్పి</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="eye-problem">
+                        <span class="chip-icon">👁️</span>
+                        <span class="chip-label-en">Eye Problem</span>
+                        <span class="chip-label-te">కంటి సమస్య</span>
+                    </button>
+                    <button class="symptom-chip" data-symptom="toothache">
+                        <span class="chip-icon">🦷</span>
+                        <span class="chip-label-en">Toothache</span>
+                        <span class="chip-label-te">పంటి నొప్పి</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Specialty Search Section -->
+            <section class="specialty-section">
+                <h2 class="section-title">
+                    <span class="title-en">Or search by specialty:</span>
+                    <span class="title-te">లేదా ప్రత్యేకత ద్వారా వెతకండి:</span>
+                </h2>
+
+                <div class="specialty-grid">
+                    <button class="specialty-chip" data-specialty="cardiology">
+                        <span class="chip-icon">❤️</span>
+                        <span class="chip-label-en">Cardiology</span>
+                        <span class="chip-label-te">గుండె వైద్యం</span>
+                    </button>
+                    <button class="specialty-chip" data-specialty="dental">
+                        <span class="chip-icon">🦷</span>
+                        <span class="chip-label-en">Dental</span>
+                        <span class="chip-label-te">దంతాలు</span>
+                    </button>
+                    <button class="specialty-chip" data-specialty="eye">
+                        <span class="chip-icon">👁️</span>
+                        <span class="chip-label-en">Eye</span>
+                        <span class="chip-label-te">కంటి</span>
+                    </button>
+                    <button class="specialty-chip" data-specialty="general">
+                        <span class="chip-icon">🩺</span>
+                        <span class="chip-label-en">General</span>
+                        <span class="chip-label-te">సాధారణ</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Location-based Search Button -->
+            <section class="location-section">
+                <button class="location-button" id="locationButton">
+                    <span class="icon">📍</span>
+                    <span class="button-text">
+                        <span class="text-en">Find Doctors Near Me</span>
+                        <span class="text-te">సమీపంలో వైద్యులను కనుగొనండి</span>
+                    </span>
+                </button>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">
+                    <span class="label-en">Search</span>
+                    <span class="label-te">వెతకండి</span>
+                </span>
+            </button>
+            <button class="nav-item">
+                <span class="nav-icon">📍</span>
+                <span class="nav-label">
+                    <span class="label-en">Near Me</span>
+                    <span class="label-te">సమీపంలో</span>
+                </span>
+            </button>
+            <button class="nav-item">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">
+                    <span class="label-en">Appts</span>
+                    <span class="label-te">అపాయింట్</span>
+                </span>
+            </button>
+            <button class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">
+                    <span class="label-en">Profile</span>
+                    <span class="label-te">ప్రొఫైల్</span>
+                </span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Voice Search Modal -->
+    <div class="modal-overlay" id="voiceModal">
+        <div class="modal-content voice-modal">
+            <button class="modal-close" id="closeVoiceModal">
+                <span>✕</span>
+                <span class="close-text">
+                    <span class="text-en">Cancel</span>
+                    <span class="text-te">రద్దు</span>
+                </span>
+            </button>
+
+            <div class="voice-content">
+                <div class="voice-icon-container">
+                    <div class="voice-pulse"></div>
+                    <div class="voice-icon">🎤</div>
+                </div>
+
+                <h2 class="voice-title">
+                    <span class="title-en">Listening...</span>
+                    <span class="title-te">వినడం...</span>
+                </h2>
+
+                <div class="voice-recording-indicator">
+                    <span class="recording-dot">◉</span>
+                    <span class="recording-text">Recording...</span>
+                    <div class="recording-bar">
+                        <div class="recording-progress"></div>
+                    </div>
+                    <span class="recording-time">0:03</span>
+                </div>
+
+                <p class="voice-instruction">
+                    <span class="instruction-en">Speak your symptoms in Telugu or English</span>
+                    <span class="instruction-te">తెలుగు లేదా ఆంగ్లంలో మీ లక్షణాలు చెప్పండి</span>
+                </p>
+
+                <div class="voice-examples">
+                    <p class="example-title">
+                        <span class="title-en">Examples</span>
+                        <span class="title-te">ఉదాహరణలు</span>:
+                    </p>
+                    <p class="example-text">"నాకు జ్వరం మరియు తలనొప్పి ఉంది"</p>
+                    <p class="example-text">"I have fever and headache"</p>
+                </div>
+
+                <button class="stop-button" id="stopRecording">
+                    <span class="button-text">
+                        <span class="text-en">Tap to Stop</span>
+                        <span class="text-te">ఆపడానికి నొక్కండి</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

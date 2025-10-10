@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Appointment Booking - Simple Design</title>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background: #F8F9FA;
+            color: #1A1A1A;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Three Color Palette */
+        :root {
+            --primary: #2563EB;      /* Blue - primary actions */
+            --text: #1A1A1A;         /* Dark gray - text */
+            --background: #F8F9FA;   /* Light gray - background */
+
+            /* Derived shades for consistency */
+            --primary-light: #3B82F6;
+            --primary-dark: #1E40AF;
+            --text-secondary: #6B7280;
+            --border: #E5E7EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+        }
+
+        /* Container for phone mockup */
+        .phone-container {
+            max-width: 414px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border-radius: 32px;
+            overflow: hidden;
+        }
+
+        /* Screen container */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            background: var(--background);
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top App Bar */
+        .app-bar {
+            height: 56px;
+            background: white;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-bar-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--background);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 90px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            height: 72px;
+            background: white;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item .label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            height: 56px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            height: 56px;
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-text:hover {
+            background: var(--background);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            width: 100%;
+            height: 56px;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            margin: 24px 0;
+            transition: border 0.2s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--primary);
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        /* Doctor Card */
+        .doctor-card {
+            display: flex;
+            gap: 16px;
+        }
+
+        .doctor-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .doctor-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .doctor-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .verified {
+            color: var(--success);
+        }
+
+        .doctor-specialty {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .doctor-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Chips */
+        .chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .chip {
+            padding: 10px 18px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            border-color: var(--primary);
+        }
+
+        .chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 56px;
+            padding: 0 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border 0.2s;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-help {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Section Headers */
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin: 28px 0 16px 0;
+        }
+
+        /* Calendar */
+        .calendar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-month {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .calendar-nav {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .calendar-nav:hover {
+            background: var(--background);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .calendar-day-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 10px 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .calendar-day.available {
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .calendar-day.available:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .calendar-day.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .calendar-day.disabled {
+            color: var(--text-secondary);
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+        }
+
+        /* Time Slots */
+        .time-slots {
+            margin: 20px 0;
+        }
+
+        .time-period {
+            margin-bottom: 20px;
+        }
+
+        .time-period-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .time-slot {
+            padding: 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary);
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .time-slot.disabled {
+            background: var(--background);
+            color: var(--text-secondary);
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Status Screens */
+        .status-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .status-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .status-icon.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-icon.error {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .status-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* Details List */
+        .details-list {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 24px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-icon {
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .detail-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            color: var(--primary);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: var(--text);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        /* Step Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 0;
+        }
+
+        .step {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.3s;
+        }
+
+        .step.active {
+            width: 32px;
+            border-radius: 5px;
+            background: var(--primary);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Profile Header */
+        .profile-header {
+            text-align: center;
+            padding: 32px 24px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white;
+            margin: -20px -20px 24px -20px;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .profile-photo-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        /* Rating */
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .stars {
+            color: #FBBF24;
+            display: flex;
+            gap: 2px;
+        }
+
+        /* Demo Navigation */
+        .demo-nav {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .demo-nav h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .demo-nav button {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .demo-nav button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .demo-nav button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .demo-nav {
+                position: static;
+                margin: 10px;
+                max-height: none;
+            }
+        }
+
+        /* Utilities */
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+        .mt-3 { margin-top: 24px; }
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+        .text-secondary { color: var(--text-secondary); }
+        .text-small { font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <!-- Demo Navigation -->
+    <div class="demo-nav">
+        <h3>Screen Navigation</h3>
+        <button onclick="showScreen('home')" class="active">1. Home / Search</button>
+        <button onclick="showScreen('results')">2. Search Results</button>
+        <button onclick="showScreen('profile')">3. Doctor Profile</button>
+        <button onclick="showScreen('date')">4. Select Date</button>
+        <button onclick="showScreen('time')">5. Select Time</button>
+        <button onclick="showScreen('details')">6. Patient Details</button>
+        <button onclick="showScreen('confirmation')">7. Confirmation</button>
+        <button onclick="showScreen('error')">8. Error Screen</button>
+    </div>
+
+    <!-- Phone Mockup Container -->
+    <div class="phone-container">
+
+        <!-- Screen 1: Home / Search -->
+        <div id="home" class="screen active">
+            <div class="app-bar">
+                <div class="app-bar-title">Doctor Booking</div>
+                <button class="icon-btn">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+
+            <div class="content">
+                <div style="text-align: center; margin: 24px 0 32px 0;">
+                    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Find Your Doctor</h1>
+                    <p style="color: var(--text-secondary); font-size: 16px;">Search by symptoms or specialty</p>
+                </div>
+
+                <div class="search-bar">
+                    <i data-lucide="search" style="color: var(--text-secondary);"></i>
+                    <input type="text" placeholder="Search symptoms or conditions...">
+                    <i data-lucide="mic" style="color: var(--text-secondary); cursor: pointer;"></i>
+                </div>
+
+                <div class="section-title">Common Symptoms</div>
+                <div class="chips-container">
+                    <div class="chip">
+                        <i data-lucide="thermometer" width="16" height="16"></i>
+                        Fever
+                    </div>
+                    <div class="chip">
+                        <i data-lucide="zap" width="16" height="16"></i>
+                        Headache
+                    </div>
+                    <div class="chip">
+                        <i data-lucide="wind" width="16" height="16"></i>
+                        Cold
+                    </div>
+                    <div class="chip">
+                        <i data-lucide="activity" width="16" height="16"></i>
+                        Body Pain
+                    </div>
+                </div>
+
+                <div class="section-title">Browse by Specialty</div>
+                <div class="chips-container">
+                    <div class="chip">
+                        <i data-lucide="heart" width="16" height="16"></i>
+                        Cardiology
+                    </div>
+                    <div class="chip">
+                        <i data-lucide="smile" width="16" height="16"></i>
+                        Dental
+                    </div>
+                    <div class="chip">
+                        <i data-lucide="eye" width="16" height="16"></i>
+                        Eye Care
+                    </div>
+                    <div class="chip">
+                        <i data-lucide="bone" width="16" height="16"></i>
+                        Orthopedic
+                    </div>
+                </div>
+
+                <button class="btn-primary mt-3" onclick="showScreen('results')">
+                    <i data-lucide="map-pin" width="20" height="20"></i>
+                    Find Doctors Near Me
+                </button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item active">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 2: Search Results -->
+        <div id="results" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('home')">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div class="app-bar-title">Search Results</div>
+                <button class="icon-btn">
+                    <i data-lucide="sliders-horizontal"></i>
+                </button>
+            </div>
+
+            <div class="content">
+                <div class="mb-2">
+                    <div style="font-size: 16px; font-weight: 600;">12 doctors found</div>
+                    <div class="text-secondary text-small">Results for "Fever"</div>
+                </div>
+
+                <div class="chips-container">
+                    <div class="chip active">All</div>
+                    <div class="chip active">
+                        <i data-lucide="check" width="14" height="14"></i>
+                        English
+                    </div>
+                    <div class="chip">< 5km</div>
+                    <div class="chip">Insurance</div>
+                </div>
+
+                <!-- Doctor Card 1 -->
+                <div class="card doctor-card">
+                    <div class="doctor-photo">
+                        <i data-lucide="user" width="40" height="40"></i>
+                    </div>
+                    <div class="doctor-info">
+                        <div class="doctor-name">
+                            Dr. Rama Mohan
+                            <i data-lucide="badge-check" width="18" height="18" class="verified"></i>
+                        </div>
+                        <div class="doctor-specialty">General Physician</div>
+                        <div class="doctor-meta">
+                            <span class="meta-item">
+                                <i data-lucide="star" width="14" height="14" style="fill: #FBBF24; color: #FBBF24;"></i>
+                                4.5
+                            </span>
+                            <span class="meta-item">
+                                <i data-lucide="map-pin" width="14" height="14"></i>
+                                2.3 km
+                            </span>
+                        </div>
+                        <div class="doctor-meta">
+                            <span class="meta-item">
+                                <i data-lucide="indian-rupee" width="14" height="14"></i>
+                                300
+                            </span>
+                            <span class="meta-item">
+                                <i data-lucide="languages" width="14" height="14"></i>
+                                English, Hindi
+                            </span>
+                        </div>
+                        <button class="btn-secondary mt-1" style="height: 44px;" onclick="showScreen('profile')">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Doctor Card 2 -->
+                <div class="card doctor-card">
+                    <div class="doctor-photo">
+                        <i data-lucide="user" width="40" height="40"></i>
+                    </div>
+                    <div class="doctor-info">
+                        <div class="doctor-name">
+                            Dr. Lakshmi Devi
+                            <i data-lucide="badge-check" width="18" height="18" class="verified"></i>
+                        </div>
+                        <div class="doctor-specialty">General Physician</div>
+                        <div class="doctor-meta">
+                            <span class="meta-item">
+                                <i data-lucide="star" width="14" height="14" style="fill: #FBBF24; color: #FBBF24;"></i>
+                                4.7
+                            </span>
+                            <span class="meta-item">
+                                <i data-lucide="map-pin" width="14" height="14"></i>
+                                3.8 km
+                            </span>
+                        </div>
+                        <div class="doctor-meta">
+                            <span class="meta-item">
+                                <i data-lucide="indian-rupee" width="14" height="14"></i>
+                                400
+                            </span>
+                            <span class="meta-item">
+                                <i data-lucide="languages" width="14" height="14"></i>
+                                English
+                            </span>
+                        </div>
+                        <div class="mt-1">
+                            <span class="badge success">
+                                <i data-lucide="shield-check" width="14" height="14"></i>
+                                Insurance Accepted
+                            </span>
+                        </div>
+                        <button class="btn-secondary mt-1" style="height: 44px;">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Doctor Card 3 -->
+                <div class="card doctor-card">
+                    <div class="doctor-photo">
+                        <i data-lucide="user" width="40" height="40"></i>
+                    </div>
+                    <div class="doctor-info">
+                        <div class="doctor-name">
+                            Dr. Venkatesh Kumar
+                            <i data-lucide="badge-check" width="18" height="18" class="verified"></i>
+                        </div>
+                        <div class="doctor-specialty">General Physician</div>
+                        <div class="doctor-meta">
+                            <span class="meta-item">
+                                <i data-lucide="star" width="14" height="14" style="fill: #FBBF24; color: #FBBF24;"></i>
+                                4.6
+                            </span>
+                            <span class="meta-item">
+                                <i data-lucide="map-pin" width="14" height="14"></i>
+                                1.5 km
+                            </span>
+                        </div>
+                        <div class="doctor-meta">
+                            <span class="meta-item">
+                                <i data-lucide="indian-rupee" width="14" height="14"></i>
+                                350
+                            </span>
+                            <span class="meta-item">
+                                <i data-lucide="languages" width="14" height="14"></i>
+                                English, Hindi
+                            </span>
+                        </div>
+                        <button class="btn-secondary mt-1" style="height: 44px;">
+                            View Profile
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn-text" style="width: 100%; margin-top: 16px;">
+                    Load More Results
+                </button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item active">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 3: Doctor Profile -->
+        <div id="profile" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('results')">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div class="app-bar-title">Doctor Profile</div>
+                <button class="icon-btn">
+                    <i data-lucide="heart"></i>
+                </button>
+            </div>
+
+            <div class="content">
+                <div class="profile-header">
+                    <div class="profile-photo-large">
+                        <i data-lucide="user" width="50" height="50"></i>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">
+                        Dr. Rama Mohan Rao
+                        <i data-lucide="badge-check" width="22" height="22" style="vertical-align: middle; margin-left: 4px;"></i>
+                    </div>
+                    <div style="font-size: 16px; margin-bottom: 12px; opacity: 0.95;">General Physician</div>
+                    <div class="rating" style="justify-content: center; margin-bottom: 8px;">
+                        <div class="stars">
+                            <i data-lucide="star" width="16" height="16" style="fill: #FBBF24;"></i>
+                            <i data-lucide="star" width="16" height="16" style="fill: #FBBF24;"></i>
+                            <i data-lucide="star" width="16" height="16" style="fill: #FBBF24;"></i>
+                            <i data-lucide="star" width="16" height="16" style="fill: #FBBF24;"></i>
+                            <i data-lucide="star" width="16" height="16" style="fill: #FBBF24;"></i>
+                        </div>
+                        <span>4.5 (150 reviews)</span>
+                    </div>
+                    <div style="opacity: 0.9;">15 years experience</div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-row">
+                        <i data-lucide="map-pin" width="24" height="24" class="info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-title">Location</div>
+                            <div class="info-value">Apollo Hospital, Visakhapatnam</div>
+                            <div class="text-secondary text-small mt-1">2.3 km from you</div>
+                            <button class="btn-text" style="padding-left: 0; margin-top: 4px;">
+                                Get Directions
+                                <i data-lucide="arrow-right" width="16" height="16"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <i data-lucide="indian-rupee" width="24" height="24" class="info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-title">Consultation Fee</div>
+                            <div class="info-value">₹500</div>
+                            <div class="mt-1">
+                                <span class="badge success">
+                                    <i data-lucide="shield-check" width="14" height="14"></i>
+                                    Insurance Accepted
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <i data-lucide="languages" width="24" height="24" class="info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-title">Languages</div>
+                            <div class="info-value">English, Hindi, Telugu</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <i data-lucide="clock" width="24" height="24" class="info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-title">Available Times</div>
+                            <div class="info-value">Mon-Sat: 9 AM - 5 PM</div>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <i data-lucide="graduation-cap" width="24" height="24" class="info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-title">Qualifications</div>
+                            <div class="info-value">MBBS, MD (General Medicine)</div>
+                            <div class="text-secondary text-small mt-1">Registration: AP-12345</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <i data-lucide="info" width="20" height="20" style="color: var(--primary);"></i>
+                        About
+                    </div>
+                    <div style="color: var(--text-secondary); line-height: 1.7;">
+                        Dr. Rama Mohan has 15 years of experience treating fever, cold, and other general health conditions. He is known for his patient-friendly approach and speaks multiple languages.
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="showScreen('date')">
+                    <i data-lucide="calendar-plus" width="20" height="20"></i>
+                    Book Appointment
+                </button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item active">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 4: Date Selection -->
+        <div id="date" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('profile')">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div class="app-bar-title">Book Appointment</div>
+                <div style="font-size: 14px; color: var(--text-secondary);">1/3</div>
+            </div>
+
+            <div class="content">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">
+                    Dr. Rama Mohan Rao • Apollo Hospital
+                </div>
+
+                <div class="step-indicator">
+                    <span class="step active"></span>
+                    <span class="step"></span>
+                    <span class="step"></span>
+                </div>
+
+                <div class="section-title">Select Date</div>
+
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button class="calendar-nav">
+                            <i data-lucide="chevron-left" width="20" height="20"></i>
+                        </button>
+                        <div class="calendar-month">October 2025</div>
+                        <button class="calendar-nav">
+                            <i data-lucide="chevron-right" width="20" height="20"></i>
+                        </button>
+                    </div>
+
+                    <div class="calendar-grid">
+                        <div class="calendar-day-label">Sun</div>
+                        <div class="calendar-day-label">Mon</div>
+                        <div class="calendar-day-label">Tue</div>
+                        <div class="calendar-day-label">Wed</div>
+                        <div class="calendar-day-label">Thu</div>
+                        <div class="calendar-day-label">Fri</div>
+                        <div class="calendar-day-label">Sat</div>
+
+                        <div class="calendar-day"></div>
+                        <div class="calendar-day"></div>
+                        <div class="calendar-day"></div>
+                        <div class="calendar-day available">1</div>
+                        <div class="calendar-day available">2</div>
+                        <div class="calendar-day available">3</div>
+                        <div class="calendar-day disabled">4</div>
+
+                        <div class="calendar-day disabled">5</div>
+                        <div class="calendar-day available">6</div>
+                        <div class="calendar-day available">7</div>
+                        <div class="calendar-day today available">8</div>
+                        <div class="calendar-day available">9</div>
+                        <div class="calendar-day available">10</div>
+                        <div class="calendar-day disabled">11</div>
+
+                        <div class="calendar-day disabled">12</div>
+                        <div class="calendar-day available">13</div>
+                        <div class="calendar-day available">14</div>
+                        <div class="calendar-day available">15</div>
+                        <div class="calendar-day available">16</div>
+                        <div class="calendar-day available">17</div>
+                        <div class="calendar-day disabled">18</div>
+
+                        <div class="calendar-day disabled">19</div>
+                        <div class="calendar-day available">20</div>
+                        <div class="calendar-day selected available">21</div>
+                        <div class="calendar-day available">22</div>
+                        <div class="calendar-day available">23</div>
+                        <div class="calendar-day available">24</div>
+                        <div class="calendar-day disabled">25</div>
+
+                        <div class="calendar-day disabled">26</div>
+                        <div class="calendar-day available">27</div>
+                        <div class="calendar-day available">28</div>
+                        <div class="calendar-day available">29</div>
+                        <div class="calendar-day available">30</div>
+                        <div class="calendar-day available">31</div>
+                    </div>
+                </div>
+
+                <button class="btn-primary mt-3" onclick="showScreen('time')">
+                    Next Step
+                    <i data-lucide="arrow-right" width="20" height="20"></i>
+                </button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 5: Time Selection -->
+        <div id="time" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('date')">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div class="app-bar-title">Book Appointment</div>
+                <div style="font-size: 14px; color: var(--text-secondary);">2/3</div>
+            </div>
+
+            <div class="content">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">
+                    Dr. Rama Mohan Rao • Apollo Hospital
+                </div>
+                <div class="text-secondary text-small mb-2">
+                    Monday, October 21, 2025
+                </div>
+
+                <div class="step-indicator">
+                    <span class="step"></span>
+                    <span class="step active"></span>
+                    <span class="step"></span>
+                </div>
+
+                <div class="section-title">Select Time</div>
+
+                <div class="time-slots">
+                    <div class="time-period">
+                        <div class="time-period-title">
+                            <i data-lucide="sunrise" width="16" height="16" style="vertical-align: middle; margin-right: 6px;"></i>
+                            Morning
+                        </div>
+                        <div class="time-grid">
+                            <div class="time-slot">9:00 AM</div>
+                            <div class="time-slot selected">10:00 AM</div>
+                            <div class="time-slot">11:00 AM</div>
+                            <div class="time-slot">12:00 PM</div>
+                        </div>
+                    </div>
+
+                    <div class="time-period">
+                        <div class="time-period-title">
+                            <i data-lucide="sun" width="16" height="16" style="vertical-align: middle; margin-right: 6px;"></i>
+                            Afternoon
+                        </div>
+                        <div class="time-grid">
+                            <div class="time-slot">2:00 PM</div>
+                            <div class="time-slot">3:00 PM</div>
+                            <div class="time-slot disabled">4:00 PM</div>
+                            <div class="time-slot disabled">5:00 PM</div>
+                        </div>
+                    </div>
+
+                    <div class="time-period">
+                        <div class="time-period-title">
+                            <i data-lucide="sunset" width="16" height="16" style="vertical-align: middle; margin-right: 6px;"></i>
+                            Evening
+                        </div>
+                        <div class="time-grid">
+                            <div class="time-slot disabled">6:00 PM</div>
+                            <div class="time-slot disabled">7:00 PM</div>
+                            <div class="time-slot disabled">8:00 PM</div>
+                            <div class="time-slot disabled">9:00 PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-help">
+                    <i data-lucide="info" width="16" height="16"></i>
+                    Evening slots typically available next day
+                </div>
+
+                <button class="btn-primary mt-3" onclick="showScreen('details')">
+                    Next Step
+                    <i data-lucide="arrow-right" width="20" height="20"></i>
+                </button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 6: Patient Details -->
+        <div id="details" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('time')">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div class="app-bar-title">Book Appointment</div>
+                <div style="font-size: 14px; color: var(--text-secondary);">3/3</div>
+            </div>
+
+            <div class="content">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">
+                    Dr. Rama Mohan Rao • Apollo Hospital
+                </div>
+                <div class="text-secondary text-small mb-2">
+                    October 21, 2025 • 10:00 AM
+                </div>
+
+                <div class="step-indicator">
+                    <span class="step"></span>
+                    <span class="step"></span>
+                    <span class="step active"></span>
+                </div>
+
+                <div class="section-title">Patient Details</div>
+
+                <div class="input-group">
+                    <label class="input-label">
+                        <i data-lucide="user" width="16" height="16" style="vertical-align: middle; margin-right: 4px;"></i>
+                        Full Name *
+                    </label>
+                    <input type="text" class="input-field" placeholder="Enter your full name">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">
+                        <i data-lucide="phone" width="16" height="16" style="vertical-align: middle; margin-right: 4px;"></i>
+                        Phone Number *
+                    </label>
+                    <input type="tel" class="input-field" placeholder="+91 9876543210">
+                    <div class="input-help">
+                        <i data-lucide="info" width="14" height="14"></i>
+                        SMS confirmation will be sent to this number
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">
+                        <i data-lucide="mail" width="16" height="16" style="vertical-align: middle; margin-right: 4px;"></i>
+                        Email (Optional)
+                    </label>
+                    <input type="email" class="input-field" placeholder="example@email.com">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">
+                        <i data-lucide="calendar-days" width="16" height="16" style="vertical-align: middle; margin-right: 4px;"></i>
+                        Age *
+                    </label>
+                    <input type="number" class="input-field" placeholder="Example: 45">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">
+                        <i data-lucide="shield-check" width="16" height="16" style="vertical-align: middle; margin-right: 4px;"></i>
+                        Insurance ID (Optional)
+                    </label>
+                    <input type="text" class="input-field" placeholder="Insurance card number">
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label">
+                        <i data-lucide="file-text" width="16" height="16" style="vertical-align: middle; margin-right: 4px;"></i>
+                        Reason for Visit (Optional)
+                    </label>
+                    <textarea class="input-field" style="height: 100px; resize: vertical; padding-top: 16px;" placeholder="Briefly describe your symptoms or reason for visit"></textarea>
+                    <div class="input-help">
+                        <i data-lucide="info" width="14" height="14"></i>
+                        This helps the doctor prepare for your appointment
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="showScreen('confirmation')">
+                    <i data-lucide="check" width="20" height="20"></i>
+                    Confirm Booking
+                </button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 7: Confirmation -->
+        <div id="confirmation" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('home')">
+                    <i data-lucide="x"></i>
+                </button>
+                <div class="app-bar-title">Confirmed</div>
+                <div></div>
+            </div>
+
+            <div class="content">
+                <div class="status-screen">
+                    <div class="status-icon success">
+                        <i data-lucide="check-circle" width="48" height="48"></i>
+                    </div>
+
+                    <div class="status-title">Appointment Confirmed!</div>
+                    <div class="status-subtitle">Your booking has been successfully confirmed</div>
+
+                    <div style="font-size: 16px; font-weight: 600; color: var(--primary); margin-bottom: 24px;">
+                        Booking ID: AP-2025-123456
+                    </div>
+
+                    <div class="details-list">
+                        <div class="detail-row">
+                            <i data-lucide="user-round" width="24" height="24" class="detail-icon"></i>
+                            <div class="detail-content">
+                                <div class="detail-label">Doctor</div>
+                                <div class="detail-value">Dr. Rama Mohan Rao</div>
+                                <div class="text-secondary text-small">General Physician</div>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <i data-lucide="calendar-clock" width="24" height="24" class="detail-icon"></i>
+                            <div class="detail-content">
+                                <div class="detail-label">Date & Time</div>
+                                <div class="detail-value">Monday, October 21, 2025</div>
+                                <div class="text-secondary text-small">10:00 AM - 10:30 AM (IST)</div>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <i data-lucide="map-pin" width="24" height="24" class="detail-icon"></i>
+                            <div class="detail-content">
+                                <div class="detail-label">Location</div>
+                                <div class="detail-value">Apollo Hospital</div>
+                                <div class="text-secondary text-small mb-1">MG Road, Visakhapatnam</div>
+                                <button class="btn-text" style="padding-left: 0;">
+                                    Get Directions
+                                    <i data-lucide="arrow-right" width="16" height="16"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <i data-lucide="indian-rupee" width="24" height="24" class="detail-icon"></i>
+                            <div class="detail-content">
+                                <div class="detail-label">Consultation Fee</div>
+                                <div class="detail-value">₹500</div>
+                                <div class="text-secondary text-small">Pay at hospital</div>
+                            </div>
+                        </div>
+
+                        <div class="detail-row">
+                            <i data-lucide="phone" width="24" height="24" class="detail-icon"></i>
+                            <div class="detail-content">
+                                <div class="detail-label">Contact</div>
+                                <div class="detail-value">+91 891 123 4567</div>
+                                <button class="btn-text" style="padding-left: 0; margin-top: 4px;">
+                                    Call Hospital
+                                    <i data-lucide="phone-call" width="16" height="16"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="info" width="18" height="18" style="color: var(--primary);"></i>
+                            What to bring
+                        </div>
+                        <ul style="margin-left: 20px; color: var(--text-secondary); line-height: 1.8;">
+                            <li>Insurance card (if applicable)</li>
+                            <li>Previous medical records</li>
+                            <li>Valid ID proof</li>
+                        </ul>
+                    </div>
+
+                    <div class="card" style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--success); font-size: 14px;">
+                            <i data-lucide="check-circle" width="18" height="18"></i>
+                            SMS confirmation sent to +91 98765 43210
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 24px;">
+                        <button class="btn-secondary">
+                            <i data-lucide="calendar-plus" width="20" height="20"></i>
+                            Add to Calendar
+                        </button>
+                        <button class="btn-secondary">
+                            <i data-lucide="share-2" width="20" height="20"></i>
+                            Share Details
+                        </button>
+                        <button class="btn-primary" onclick="showScreen('home')">
+                            <i data-lucide="home" width="20" height="20"></i>
+                            Back to Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Screen 8: Error Screen -->
+        <div id="error" class="screen">
+            <div class="app-bar">
+                <button class="icon-btn" onclick="showScreen('details')">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+                <div class="app-bar-title">Booking Failed</div>
+                <div></div>
+            </div>
+
+            <div class="content">
+                <div class="status-screen">
+                    <div class="status-icon error">
+                        <i data-lucide="alert-triangle" width="48" height="48"></i>
+                    </div>
+
+                    <div class="status-title">Something Went Wrong</div>
+                    <div class="status-subtitle">
+                        The selected time slot is no longer available. Another patient may have booked it.
+                    </div>
+
+                    <div style="margin-top: 32px;">
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">What you can do:</div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn-primary" onclick="showScreen('time')">
+                                <i data-lucide="refresh-cw" width="20" height="20"></i>
+                                Try Another Time Slot
+                            </button>
+
+                            <button class="btn-secondary" onclick="showScreen('results')">
+                                <i data-lucide="search" width="20" height="20"></i>
+                                Search Other Doctors
+                            </button>
+
+                            <button class="btn-secondary">
+                                <i data-lucide="phone-call" width="20" height="20"></i>
+                                Call Hospital
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div style="font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <i data-lucide="headphones" width="18" height="18" style="color: var(--primary);"></i>
+                            Need Help?
+                        </div>
+                        <div class="text-secondary text-small">
+                            <div style="margin-bottom: 6px;">
+                                <i data-lucide="phone" width="14" height="14" style="vertical-align: middle; margin-right: 4px;"></i>
+                                Call: 1800-XXX-XXXX (Toll Free)
+                            </div>
+                            <div>
+                                <i data-lucide="message-circle" width="14" height="14" style="vertical-align: middle; margin-right: 4px;"></i>
+                                WhatsApp: +91 98765 43210
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                            Error Code: ERR_SLOT_UNAVAILABLE<br>
+                            Reference: AP-ERR-2025-7890
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="#" class="nav-item">
+                    <i data-lucide="search" width="24" height="24"></i>
+                    <span class="label">Search</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin" width="24" height="24"></i>
+                    <span class="label">Near Me</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i data-lucide="calendar" width="24" height="24"></i>
+                    <span class="label">Appointments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="user" width="24" height="24"></i>
+                    <span class="label">Profile</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+
+            // Reinitialize icons for the new screen
+            lucide.createIcons();
+
+            // Update demo nav buttons
+            document.querySelectorAll('.demo-nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize icons
+            lucide.createIcons();
+
+            // Chip filtering
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+
+            // Calendar day selection
+            document.querySelectorAll('.calendar-day.available').forEach(day => {
+                day.addEventListener('click', function() {
+                    document.querySelectorAll('.calendar-day').forEach(d => {
+                        d.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+
+            // Time slot selection
+            document.querySelectorAll('.time-slot:not(.disabled)').forEach(slot => {
+                slot.addEventListener('click', function() {
+                    document.querySelectorAll('.time-slot').forEach(s => {
+                        s.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
