@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaEnvelope, FaPhoneAlt, FaLock, FaArrowLeft, FaEye, FaEyeSlash, FaEdit } from "react-icons/fa";
+import { FaEnvelope, FaPhoneAlt, FaLock, FaArrowLeft, FaEye, FaEyeSlash, FaEdit, FaShieldAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { API_BASE_URL } from "../../lib/config";
+import EnterpriseButton from "../../components/EnterpriseButton";
+import EnterpriseInput from "../../components/EnterpriseInput";
+import EnterpriseCard, { CardBody } from "../../components/EnterpriseCard";
 
 const DoctorVerify = () => {
   const navigate = useNavigate();
@@ -430,208 +433,244 @@ const DoctorVerify = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-[Poppins] px-6 pt-6 pb-28">
-      <button onClick={() => navigate(-1)} className="text-xl mb-4">
-        <FaArrowLeft />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 font-[Poppins] px-4 sm:px-6 lg:px-8 pt-6 pb-28">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="group flex items-center gap-2 text-slate-600 hover:text-[#004B5C] transition-all duration-200 mb-6"
+      >
+        <div className="p-2 rounded-lg bg-white border border-slate-200 group-hover:border-[#004B5C] group-hover:shadow-md transition-all duration-200">
+          <FaArrowLeft className="text-lg" />
+        </div>
+        <span className="font-medium">Back</span>
       </button>
 
       {/* Header */}
-      <div className="flex flex-col items-center text-center mb-6">
-        <img src="/assets/logo.png" alt="Logo" className="w-28 h-28 mb-4" />
-        <h1 className="text-3xl font-extrabold text-[#004B5C]">
-          Doctor Verification
-        </h1>
-        <p className="text-base text-gray-700 mt-1">
-          Enter details to Register/Login with OTP
-        </p>
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#004B5C] to-[#006B7D] rounded-3xl blur-2xl opacity-20"></div>
+          <img src="/assets/logo.png" alt="Logo" className="w-32 h-32 relative rounded-2xl shadow-lg" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-2">
+            <FaShieldAlt className="text-[#004B5C] text-2xl" />
+            <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-[#004B5C] to-[#006B7D] bg-clip-text text-transparent">
+              Doctor Verification
+            </h1>
+          </div>
+          <p className="text-base text-slate-600 max-w-md mx-auto">
+            Secure authentication with OTP verification for healthcare professionals
+          </p>
+        </div>
       </div>
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-md mx-auto space-y-6"
-        autoComplete="off"
-      >
-        {/* Email */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">Email</label>
-          <div className={`flex items-center border rounded-xl px-3 py-2 ${
-            touched.email && errors.email ? 'border-red-500' : 'border-[#7A869A]'
-          }`}>
-            <FaEnvelope className="text-[#7A869A] mr-2" />
-            <input
+      {/* Form Card */}
+      <EnterpriseCard className="max-w-2xl mx-auto">
+        <CardBody className="p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
+            {/* Email */}
+            <EnterpriseInput
+              label="Email Address"
               type="email"
               name="email"
-              placeholder="Enter Your Email"
-              className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
+              placeholder="your.email@example.com"
+              icon={<FaEnvelope />}
               value={formData.email}
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={otpSent && !isEditMode}
+              error={touched.email ? errors.email : ""}
+              helperText="We'll use this for important account notifications"
             />
-          </div>
-          {touched.email && errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-          )}
-        </div>
 
-        {/* Password with Show/Hide functionality */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">Password</label>
-          <div className={`flex items-center border rounded-xl px-3 py-2 ${
-            touched.password && errors.password ? 'border-red-500' : 'border-[#7A869A]'
-          }`}>
-            <FaLock className="text-[#7A869A] mr-2" />
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter Password (min 6 chars)"
-              className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              disabled={otpSent && !isEditMode}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-[#7A869A] ml-2 hover:text-[#004B5C] transition"
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-          {touched.password && errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-          )}
-        </div>
+            {/* Password */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-slate-700">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400">
+                  <FaLock />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Minimum 6 characters"
+                  className={`
+                    w-full px-4 py-3 pl-12 pr-12
+                    border-2 rounded-xl
+                    ${touched.password && errors.password
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                      : 'border-slate-300 focus:border-[#004B5C] focus:ring-[#004B5C]/10'
+                    }
+                    focus:ring-4
+                    outline-none
+                    bg-white
+                    text-slate-900
+                    placeholder-slate-400
+                    text-base
+                    transition-all
+                    duration-200
+                    disabled:bg-slate-50
+                    disabled:text-slate-500
+                  `}
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={otpSent && !isEditMode}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-[#004B5C] transition-colors"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+              {touched.password && errors.password && (
+                <p className="text-sm text-red-500 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                  {errors.password}
+                </p>
+              )}
+            </div>
 
-        {/* Mobile + OTP */}
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Mobile Number
-          </label>
-          <div className={`flex items-center border rounded-xl px-3 py-2 ${
-            touched.mobileNumber && errors.mobileNumber ? 'border-red-500' : 'border-[#7A869A]'
-          }`}>
-            <FaPhoneAlt className="text-[#7A869A] mr-2" />
-            <input
+            {/* Mobile Number */}
+            <EnterpriseInput
+              label="Mobile Number"
               type="tel"
               name="mobileNumber"
-              placeholder="Enter 10-digit Mobile Number"
-              className="w-full outline-none bg-transparent text-gray-700 placeholder-gray-500"
+              placeholder="10-digit mobile number"
+              icon={<FaPhoneAlt />}
               maxLength={10}
               value={formData.mobileNumber}
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={otpSent && !isEditMode}
+              error={touched.mobileNumber ? errors.mobileNumber : ""}
+              helperText="OTP will be sent to this number"
             />
-          </div>
-          {touched.mobileNumber && errors.mobileNumber && (
-            <p className="text-red-500 text-sm mt-1">{errors.mobileNumber}</p>
-          )}
 
-          {/* Send OTP Button or Edit Details Button */}
-          {!otpSent || isEditMode ? (
-            <button
-              type="button"
-              onClick={handleSendOtp}
-              className="mt-2 px-4 py-2 bg-[#004B5C] text-white rounded-full font-medium hover:bg-[#003246] transition"
-            >
-              Send OTP
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 mt-2">
-              <button
-                type="button"
-                onClick={handleEditDetails}
-                className="px-4 py-2 bg-gray-600 text-white rounded-full font-medium hover:bg-gray-700 transition flex items-center gap-2"
-              >
-                <FaEdit className="text-sm" />
-                Edit Details
-              </button>
-            </div>
-          )}
-
-          {/* OTP Section */}
-          {otpSent && !isEditMode && (
-            <div className="mt-3">
-              <label className="block text-sm font-semibold mb-1">
-                Enter OTP
-              </label>
-              <input
-                type="text"
-                maxLength={6}
-                value={otp}
-                onChange={handleOtpChange}
-                onBlur={handleOtpBlur}
-                className={`w-full border px-4 py-2 rounded-xl outline-none placeholder-gray-500 ${
-                  touched.otp && errors.otp ? 'border-red-500' : 'border-[#7A869A]'
-                }`}
-                placeholder="6-digit OTP"
-              />
-              {touched.otp && errors.otp && (
-                <p className="text-red-500 text-sm mt-1">{errors.otp}</p>
-              )}
-
-              <div className="flex items-center justify-between mt-2">
-                <button 
+            {/* Send OTP / Edit Button */}
+            <div className="flex gap-3">
+              {!otpSent || isEditMode ? (
+                <EnterpriseButton
                   type="button"
-                  onClick={handleVerifyOtp}
-                  className="px-4 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition"
+                  onClick={handleSendOtp}
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  icon={<FaPhoneAlt />}
                 >
-                  Verify OTP
-                </button>
+                  Send OTP
+                </EnterpriseButton>
+              ) : (
+                <EnterpriseButton
+                  type="button"
+                  onClick={handleEditDetails}
+                  variant="secondary"
+                  size="md"
+                  icon={<FaEdit />}
+                >
+                  Edit Details
+                </EnterpriseButton>
+              )}
+            </div>
 
-                <div className="text-sm text-gray-600">
-                  {timer > 0 ? (
-                    <span>
-                      Expires in{" "}
-                      {String(Math.floor(timer / 60)).padStart(2, "0")}:
-                      {String(timer % 60).padStart(2, "0")}
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleSendOtp}
-                      className="text-sm text-[#004B5C] underline hover:text-[#003246]"
-                    >
-                      Resend
-                    </button>
-                  )}
+            {/* OTP Section */}
+            {otpSent && !isEditMode && (
+              <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200/50 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <h3 className="text-sm font-bold text-slate-700">OTP Verification</h3>
+                </div>
+
+                <EnterpriseInput
+                  label="Enter OTP Code"
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={handleOtpChange}
+                  onBlur={handleOtpBlur}
+                  placeholder="Enter 6-digit code"
+                  error={touched.otp ? errors.otp : ""}
+                  containerClassName="mb-4"
+                />
+
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <EnterpriseButton
+                    type="button"
+                    onClick={handleVerifyOtp}
+                    variant="success"
+                    size="md"
+                  >
+                    Verify OTP
+                  </EnterpriseButton>
+
+                  <div className="text-sm font-medium text-slate-600">
+                    {timer > 0 ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-slate-200">
+                        <span className="text-xs">Expires in</span>
+                        <span className="text-[#004B5C] font-bold tabular-nums">
+                          {String(Math.floor(timer / 60)).padStart(2, "0")}:
+                          {String(timer % 60).padStart(2, "0")}
+                        </span>
+                      </div>
+                    ) : (
+                      <EnterpriseButton
+                        type="button"
+                        onClick={handleSendOtp}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Resend OTP
+                      </EnterpriseButton>
+                    )}
+                  </div>
                 </div>
               </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-6">
+              <EnterpriseButton
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={isSubmitting}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Processing..." : "Continue to Dashboard"}
+              </EnterpriseButton>
             </div>
-          )}
-        </div>
+          </form>
+        </CardBody>
+      </EnterpriseCard>
 
-        {/* Submit */}
-        <div className="pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3 rounded-full font-semibold bg-[#004B5C] text-white hover:bg-[#003246] transition disabled:opacity-60"
-          >
-            {isSubmitting ? "Processing..." : "Continue"}
-          </button>
-        </div>
-      </form>
-
-      {/* Popup */}
+      {/* Enhanced Popup */}
       {showPopup && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-[2rem] px-10 py-8 max-w-sm w-full text-center shadow-2xl">
-            <img
-              src="/assets/popups/success.png"
-              alt="Success"
-              className="w-28 h-28 object-contain mx-auto mb-6"
-            />
-            <h3 className="text-[22px] font-bold text-[#1F2A37] mb-2">
-              Registration Submitted
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl px-8 py-10 max-w-md w-full text-center shadow-2xl transform animate-in fade-in zoom-in duration-300">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-green-400 rounded-full blur-3xl opacity-30"></div>
+              <img
+                src="/assets/popups/success.png"
+                alt="Success"
+                className="w-32 h-32 object-contain mx-auto relative"
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-3">
+              Registration Submitted Successfully
             </h3>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              Your registration is pending verification. Please wait for
-              approval.
+            <p className="text-base text-slate-600 leading-relaxed">
+              Your registration is under review. Our team will verify your credentials and notify you once approved.
             </p>
+            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <p className="text-sm text-blue-700 font-medium">
+                You'll receive an email notification within 24-48 hours
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { specializations } from "../../utils/category";
+import EnterpriseButton from "../../components/EnterpriseButton";
+import EnterpriseInput, { EnterpriseTextarea } from "../../components/EnterpriseInput";
+import EnterpriseCard, { CardBody, CardHeader } from "../../components/EnterpriseCard";
+import { FaUser, FaIdCard, FaCertificate, FaHospital, FaImage, FaPlus, FaTrash, FaShieldAlt } from "react-icons/fa";
 
 export const DoctorVerification = () => {
   const navigate = useNavigate();
@@ -227,393 +231,429 @@ export const DoctorVerification = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-[Poppins] px-6 pt-6 pb-28">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-extrabold text-[#004B5C] text-center mb-6">
-          Doctor Professional Verification
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 font-[Poppins] px-4 sm:px-6 lg:px-8 pt-8 pb-28">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="p-3 bg-gradient-to-br from-[#004B5C] to-[#006B7D] rounded-2xl shadow-lg">
+              <FaShieldAlt className="text-white text-3xl" />
+            </div>
+            <h1 className="text-2xl sm:text-4xl font-extrabold bg-gradient-to-r from-[#004B5C] to-[#006B7D] bg-clip-text text-transparent">
+              Professional Verification
+            </h1>
+          </div>
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+            Complete your professional profile to provide quality healthcare services
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Full Name */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Enter full name"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Gender */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Gender</label>
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          {/* Date of Birth */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Medical Council Registration Number */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Medical Council Registration Number
-            </label>
-            <input
-              type="text"
-              name="medicalCouncilRegistrationNumber"
-              placeholder="Enter registration number"
-              value={formData.medicalCouncilRegistrationNumber}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Medical Council Name */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Medical Council Name
-            </label>
-            <input
-              type="text"
-              name="medicalCouncilName"
-              placeholder="e.g., Andhra Pradesh Medical Council"
-              value={formData.medicalCouncilName}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Year of Registration */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Year of Registration
-            </label>
-            <input
-              type="number"
-              name="yearOfRegistration"
-              value={formData.yearOfRegistration}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">Category</label>
-
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            >
-              <option value="">-- Select Category --</option>
-              {specializations?.map((item, index) => (
-                <option key={index} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Primary Specialization */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Primary Specialization
-            </label>
-            <input
-              type="text"
-              name="primarySpecialization"
-              placeholder="e.g., General Physician"
-              value={formData.primarySpecialization}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Additional Specializations */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Additional Specializations (comma separated)
-            </label>
-            <input
-              type="text"
-              name="additionalSpecializations"
-              placeholder="e.g., Diabetes, Hypertension"
-              value={formData.additionalSpecializations}
-              onChange={handleChange}
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Experience */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Experience (Years)
-            </label>
-            <input
-              type="number"
-              name="experienceYears"
-              value={formData.experienceYears}
-              onChange={handleChange}
-              required
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* Qualifications (dynamic) */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Qualifications
-            </label>
-            {formData.qualifications.map((q, idx) => (
-              <div key={idx} className="mb-3 p-3 border rounded-xl">
-                <input
-                  type="text"
-                  placeholder="Degree"
-                  value={q.degree}
-                  onChange={(e) =>
-                    handleQualificationChange(idx, "degree", e.target.value)
-                  }
-                  required
-                  className="w-full mb-2 border border-gray-300 px-3 py-2 rounded"
-                />
-                <input
-                  type="text"
-                  placeholder="University / College"
-                  value={q.universityCollege}
-                  onChange={(e) =>
-                    handleQualificationChange(
-                      idx,
-                      "universityCollege",
-                      e.target.value
-                    )
-                  }
-                  className="w-full mb-2 border border-gray-300 px-3 py-2 rounded"
-                />
-                <input
-                  type="text"
-                  placeholder="Year"
-                  value={q.year}
-                  onChange={(e) =>
-                    handleQualificationChange(idx, "year", e.target.value)
-                  }
-                  className="w-full mb-2 border border-gray-300 px-3 py-2 rounded"
-                />
-                <div className="flex gap-2">
-                  {formData.qualifications.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeQualification(idx)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </button>
-                  )}
-                  {idx === formData.qualifications.length - 1 && (
-                    <button
-                      type="button"
-                      onClick={addQualification}
-                      className="text-green-600"
-                    >
-                      Add
-                    </button>
-                  )}
+          {/* Personal Information */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                  <FaUser className="text-white text-lg" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Personal Information</h2>
+                  <p className="text-sm text-slate-500">Your basic details</p>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Aadhaar */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Aadhaar Number (Optional)
-            </label>
-            <input
-              type="text"
-              name="aadhaarNumber"
-              placeholder="Enter Aadhaar"
-              value={formData.aadhaarNumber}
-              onChange={handleChange}
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
-
-          {/* PAN */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              PAN Number (Optional)
-            </label>
-            <input
-              type="text"
-              name="panNumber"
-              placeholder="Enter PAN (optional)"
-              value={formData.panNumber}
-              onChange={handleChange}
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-              aria-required="false"
-            />
-          </div>
-
-          {/* Aadhaar Image (identity document) */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Aadhaar Image (Required)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, setIdentityDocumentFile)}
-              required
-              className="w-full border border-gray-300 px-3 py-2 rounded"
-            />
-            <small className="text-gray-500">
-              Upload Aadhaar as an image (jpg/png/gif).
-            </small>
-          </div>
-
-          {/* Medical Council Certificate (image) */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Medical Council Certificate (Image)z
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                handleFileChange(e, setMedicalCouncilCertificateFile)
-              }
-              required
-              className="w-full border border-gray-300 px-3 py-2 rounded"
-            />
-          </div>
-
-          {/* Qualification Certificate Images (multiple) */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Qualification Certificate Images (you can select multiple)
-            </label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, null, true)}
-              required
-              className="w-full border border-gray-300 px-3 py-2 rounded"
-            />
-            <small className="text-gray-500">
-              Upload images (jpg/png/gif) of degree certificates.
-            </small>
-          </div>
-
-          {/* Profile Image */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Profile Image (Required)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, setProfileImageFile)}
-              required
-              className="w-full border border-gray-300 px-3 py-2 rounded"
-            />
-          </div>
-
-          {/* Location Fields */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Location Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <EnterpriseInput
+                label="Full Name"
                 type="text"
-                placeholder="City"
-                value={formData.location.city}
-                onChange={(e) => handleLocationChange('city', e.target.value)}
+                name="fullName"
+                placeholder="Dr. Your Full Name"
+                icon={<FaUser />}
+                value={formData.fullName}
+                onChange={handleChange}
                 required
-                className="w-full border border-gray-400 px-4 py-2 rounded-xl"
               />
-              <input
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">Gender</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border-2 rounded-xl border-slate-300 focus:border-[#004B5C] focus:ring-4 focus:ring-[#004B5C]/10 outline-none bg-white text-slate-900 text-base transition-all duration-200"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <EnterpriseInput
+                  label="Date of Birth"
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </CardBody>
+          </EnterpriseCard>
+
+          {/* Medical Council Details */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
+                  <FaIdCard className="text-white text-lg" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Medical Council Registration</h2>
+                  <p className="text-sm text-slate-500">Professional credentials</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <EnterpriseInput
+                label="Medical Council Registration Number"
                 type="text"
-                placeholder="State"
-                value={formData.location.state}
-                onChange={(e) => handleLocationChange('state', e.target.value)}
+                name="medicalCouncilRegistrationNumber"
+                placeholder="Enter registration number"
+                icon={<FaIdCard />}
+                value={formData.medicalCouncilRegistrationNumber}
+                onChange={handleChange}
                 required
-                className="w-full border border-gray-400 px-4 py-2 rounded-xl"
+                helperText="Your unique medical council registration number"
               />
-            </div>
-          </div>
 
-          {/* Consultation Fee */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              Consultation Fee (₹)
-            </label>
-            <input
-              type="number"
-              name="consultationFee"
-              placeholder="Enter consultation fee"
-              value={formData.consultationFee}
-              onChange={handleChange}
-              required
-              min="0"
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl"
-            />
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <EnterpriseInput
+                  label="Medical Council Name"
+                  type="text"
+                  name="medicalCouncilName"
+                  placeholder="e.g., Andhra Pradesh Medical Council"
+                  value={formData.medicalCouncilName}
+                  onChange={handleChange}
+                  required
+                />
 
-          {/* About */}
-          <div>
-            <label className="block text-sm font-semibold mb-1">
-              About
-            </label>
-            <textarea
-              name="about"
-              placeholder="Write about your practice and experience"
-              value={formData.about}
-              onChange={handleChange}
-              rows="4"
-              className="w-full border border-gray-400 px-4 py-2 rounded-xl resize-none"
-            />
-          </div>
+                <EnterpriseInput
+                  label="Year of Registration"
+                  type="number"
+                  name="yearOfRegistration"
+                  placeholder="e.g., 2015"
+                  value={formData.yearOfRegistration}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </CardBody>
+          </EnterpriseCard>
 
-          <button
-            type="submit"
-            className="w-full py-3 rounded-full font-semibold bg-[#004B5C] text-white hover:bg-[#003246] transition"
-          >
-            Submit for Verification
-          </button>
+          {/* Specialization & Experience */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                  <FaCertificate className="text-white text-lg" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Specialization & Experience</h2>
+                  <p className="text-sm text-slate-500">Your medical expertise</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 rounded-xl border-slate-300 focus:border-[#004B5C] focus:ring-4 focus:ring-[#004B5C]/10 outline-none bg-white text-slate-900 text-base transition-all duration-200"
+                >
+                  <option value="">Select Category</option>
+                  {specializations?.map((item, index) => (
+                    <option key={index} value={item}>{item}</option>
+                  ))}
+                </select>
+              </div>
+
+              <EnterpriseInput
+                label="Primary Specialization"
+                type="text"
+                name="primarySpecialization"
+                placeholder="e.g., General Physician"
+                value={formData.primarySpecialization}
+                onChange={handleChange}
+                required
+              />
+
+              <EnterpriseInput
+                label="Additional Specializations"
+                type="text"
+                name="additionalSpecializations"
+                placeholder="e.g., Diabetes, Hypertension (comma separated)"
+                value={formData.additionalSpecializations}
+                onChange={handleChange}
+                helperText="Add multiple specializations separated by commas"
+              />
+
+              <EnterpriseInput
+                label="Years of Experience"
+                type="number"
+                name="experienceYears"
+                placeholder="e.g., 10"
+                value={formData.experienceYears}
+                onChange={handleChange}
+                required
+                helperText="Total years of medical practice"
+              />
+            </CardBody>
+          </EnterpriseCard>
+
+          {/* Qualifications */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
+                    <FaCertificate className="text-white text-lg" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">Qualifications</h2>
+                    <p className="text-sm text-slate-500">Your educational background</p>
+                  </div>
+                </div>
+                <EnterpriseButton
+                  type="button"
+                  onClick={addQualification}
+                  variant="secondary"
+                  size="sm"
+                  icon={<FaPlus />}
+                >
+                  Add More
+                </EnterpriseButton>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-4">
+              {formData.qualifications.map((q, idx) => (
+                <div key={idx} className="p-5 bg-slate-50 border-2 border-slate-200 rounded-xl space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold text-slate-700">Qualification {idx + 1}</h3>
+                    {formData.qualifications.length > 1 && (
+                      <EnterpriseButton
+                        type="button"
+                        onClick={() => removeQualification(idx)}
+                        variant="danger"
+                        size="sm"
+                        icon={<FaTrash />}
+                      >
+                        Remove
+                      </EnterpriseButton>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <EnterpriseInput
+                      label="Degree"
+                      type="text"
+                      placeholder="e.g., MBBS"
+                      value={q.degree}
+                      onChange={(e) => handleQualificationChange(idx, "degree", e.target.value)}
+                      required
+                    />
+                    <EnterpriseInput
+                      label="University / College"
+                      type="text"
+                      placeholder="e.g., AIIMS Delhi"
+                      value={q.universityCollege}
+                      onChange={(e) => handleQualificationChange(idx, "universityCollege", e.target.value)}
+                    />
+                    <EnterpriseInput
+                      label="Year"
+                      type="text"
+                      placeholder="e.g., 2010"
+                      value={q.year}
+                      onChange={(e) => handleQualificationChange(idx, "year", e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </CardBody>
+          </EnterpriseCard>
+
+          {/* Identity & Documents */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg">
+                  <FaIdCard className="text-white text-lg" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Identity & Tax Information</h2>
+                  <p className="text-sm text-slate-500">Verification documents (optional)</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <EnterpriseInput
+                  label="Aadhaar Number (Optional)"
+                  type="text"
+                  name="aadhaarNumber"
+                  placeholder="12-digit Aadhaar number"
+                  value={formData.aadhaarNumber}
+                  onChange={handleChange}
+                  helperText="Used for identity verification"
+                />
+                <EnterpriseInput
+                  label="PAN Number (Optional)"
+                  type="text"
+                  name="panNumber"
+                  placeholder="e.g., ABCDE1234F"
+                  value={formData.panNumber}
+                  onChange={handleChange}
+                  helperText="Required for tax compliance"
+                />
+              </div>
+            </CardBody>
+          </EnterpriseCard>
+
+          {/* Upload Documents */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg">
+                  <FaImage className="text-white text-lg" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Upload Documents</h2>
+                  <p className="text-sm text-slate-500">Required certificates and images</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Profile Image *</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, setProfileImageFile)}
+                  required
+                  className="w-full px-4 py-3 border-2 rounded-xl border-slate-300 focus:border-[#004B5C] focus:ring-4 focus:ring-[#004B5C]/10 outline-none bg-white text-slate-900 text-base transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#004B5C] file:text-white file:cursor-pointer"
+                />
+                <p className="text-sm text-slate-500">Professional headshot (JPG, PNG, GIF)</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Aadhaar Card Image *</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, setIdentityDocumentFile)}
+                  required
+                  className="w-full px-4 py-3 border-2 rounded-xl border-slate-300 focus:border-[#004B5C] focus:ring-4 focus:ring-[#004B5C]/10 outline-none bg-white text-slate-900 text-base transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#004B5C] file:text-white file:cursor-pointer"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Medical Council Certificate *</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, setMedicalCouncilCertificateFile)}
+                  required
+                  className="w-full px-4 py-3 border-2 rounded-xl border-slate-300 focus:border-[#004B5C] focus:ring-4 focus:ring-[#004B5C]/10 outline-none bg-white text-slate-900 text-base transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#004B5C] file:text-white file:cursor-pointer"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">Qualification Certificates * (Multiple)</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, null, true)}
+                  required
+                  className="w-full px-4 py-3 border-2 rounded-xl border-slate-300 focus:border-[#004B5C] focus:ring-4 focus:ring-[#004B5C]/10 outline-none bg-white text-slate-900 text-base transition-all duration-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#004B5C] file:text-white file:cursor-pointer"
+                />
+                <p className="text-sm text-slate-500">Upload all degree certificates</p>
+              </div>
+            </CardBody>
+          </EnterpriseCard>
+
+          {/* Practice Information */}
+          <EnterpriseCard>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
+                  <FaHospital className="text-white text-lg" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Practice Information</h2>
+                  <p className="text-sm text-slate-500">Location and consultation details</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardBody className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <EnterpriseInput
+                  label="City"
+                  type="text"
+                  placeholder="e.g., Hyderabad"
+                  value={formData.location.city}
+                  onChange={(e) => handleLocationChange('city', e.target.value)}
+                  required
+                />
+                <EnterpriseInput
+                  label="State"
+                  type="text"
+                  placeholder="e.g., Telangana"
+                  value={formData.location.state}
+                  onChange={(e) => handleLocationChange('state', e.target.value)}
+                  required
+                />
+              </div>
+
+              <EnterpriseInput
+                label="Consultation Fee (₹)"
+                type="number"
+                name="consultationFee"
+                placeholder="e.g., 500"
+                value={formData.consultationFee}
+                onChange={handleChange}
+                required
+                min="0"
+                helperText="Your standard consultation fee"
+              />
+
+              <EnterpriseTextarea
+                label="About Your Practice"
+                name="about"
+                placeholder="Describe your medical practice, expertise, and approach to patient care..."
+                value={formData.about}
+                onChange={handleChange}
+                rows={5}
+                helperText="Share your professional background and patient care philosophy"
+              />
+            </CardBody>
+          </EnterpriseCard>
+
+          {/* Submit Button */}
+          <div className="pt-4">
+            <EnterpriseButton
+              type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              icon={<FaShieldAlt />}
+            >
+              Submit for Professional Verification
+            </EnterpriseButton>
+          </div>
         </form>
       </div>
     </div>
